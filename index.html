@@ -1,0 +1,1376 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#3E6B2C">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="PoliNido">
+<meta name="mobile-web-app-capable" content="yes">
+<title>PoliNido</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#F1F5EA;
+    --surface:#FFFFFF;
+    --surface-alt:#E7EEDC;
+    --ink:#202B1B;
+    --muted:#5B6B52;
+    --accent:#C98A16;
+    --accent-ink:#3D2B04;
+    --accent-soft:#F6E4B8;
+    --leaf:#3E6B2C;
+    --leaf-soft:#DCEAD2;
+    --line:#D6E0C8;
+    --danger:#A8452B;
+    --danger-soft:#F3DCD2;
+    --shadow: 0 1px 2px rgba(32,43,27,0.06), 0 6px 20px rgba(32,43,27,0.05);
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#121A0F; --surface:#1A2416; --surface-alt:#212D1B; --ink:#E9EFDD; --muted:#A6B69A;
+      --accent:#E7B84B; --accent-ink:#2B1F04; --accent-soft:#3A2E10; --leaf:#84C267; --leaf-soft:#233020;
+      --line:#2C3A24; --danger:#E0906F; --danger-soft:#3A241C;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#121A0F; --surface:#1A2416; --surface-alt:#212D1B; --ink:#E9EFDD; --muted:#A6B69A;
+    --accent:#E7B84B; --accent-ink:#2B1F04; --accent-soft:#3A2E10; --leaf:#84C267; --leaf-soft:#233020;
+    --line:#2C3A24; --danger:#E0906F; --danger-soft:#3A241C;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-variant-numeric: tabular-nums; line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+
+  a{color:var(--leaf);}
+  h1,h2,h3{font-family:'Fraunces', Georgia, serif; font-weight:600; text-wrap:balance; margin:0;}
+
+  .shell{max-width:640px; margin:0 auto; padding:20px 16px 64px;}
+
+  header.top{display:flex; align-items:center; gap:12px; padding:10px 2px 6px;}
+  header.top .mark{
+    width:40px; height:40px; flex:none; border-radius:11px;
+    background:var(--leaf-soft); display:flex; align-items:center; justify-content:center;
+  }
+  header.top .mark svg{width:22px; height:22px;}
+  header.top h1{font-size:1.5rem; color:var(--ink);}
+  header.top p{margin:2px 0 0; font-size:0.85rem; color:var(--muted);}
+
+  /* tabs */
+  .tabbar{display:flex; gap:4px; background:var(--surface-alt); padding:5px; border-radius:12px; border:1px solid var(--line); margin-top:18px;}
+  .tab{flex:1; text-align:center; padding:10px 6px; border-radius:9px; border:none; background:transparent; color:var(--muted); font:inherit; font-weight:600; font-size:0.84rem; cursor:pointer; min-height:42px;}
+  .tab[aria-selected="true"]{background:var(--surface); color:var(--ink); box-shadow:var(--shadow);}
+  .tab:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .tabpanel{display:none;}
+  .tabpanel.active{display:block;}
+
+  section{margin-top:22px;}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow);}
+
+  .notice{
+    background:var(--accent-soft); color:var(--accent-ink); border-radius:12px; padding:14px 16px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-top:16px;
+  }
+  .notice p{margin:0; font-size:0.87rem; font-weight:600;}
+  .notice .btn{background:var(--surface); border-color:transparent;}
+
+  .flow{padding:6px 0 0;}
+  .step{padding:20px;}
+  .step + .step{border-top:1px solid var(--line);}
+  .step-label{
+    display:flex; align-items:center; gap:10px; font-family:'Fraunces', Georgia, serif; font-weight:600;
+    font-size:1.05rem; margin-bottom:10px; color:var(--ink);
+  }
+  .step-num{
+    width:26px; height:26px; border-radius:50%; flex:none; background:var(--leaf); color:#fff;
+    font-family:'Public Sans', sans-serif; font-size:0.8rem; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .hint{font-size:0.85rem; color:var(--muted); margin:0 0 12px;}
+
+  .btn{
+    appearance:none; border:1px solid var(--line); background:var(--surface-alt); color:var(--ink);
+    font:inherit; font-weight:600; font-size:0.92rem; padding:11px 16px; border-radius:10px; cursor:pointer;
+    display:inline-flex; align-items:center; gap:8px; min-height:44px;
+    transition:transform 0.08s ease, background 0.15s ease;
+  }
+  .btn:hover{background:var(--leaf-soft);}
+  .btn:active{transform:translateY(1px);}
+  .btn:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .btn-primary{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
+  .btn-primary:hover{filter:brightness(1.04);}
+  .btn-primary:disabled{opacity:0.5; cursor:not-allowed;}
+  .btn-ghost{background:transparent; border-color:transparent; color:var(--muted); padding:8px 10px; min-height:auto;}
+  .btn-ghost:hover{background:var(--surface-alt); color:var(--ink);}
+  .btn-danger{background:transparent; border-color:var(--danger); color:var(--danger);}
+  .btn-danger:hover{background:var(--danger-soft);}
+  .btn-block{width:100%; justify-content:center; font-size:1rem; padding:13px 16px;}
+
+  input[type="text"], input[type="number"]{
+    width:100%; font:inherit; font-size:1rem; color:var(--ink); background:var(--surface);
+    border:1px solid var(--line); border-radius:10px; padding:11px 13px; min-height:44px;
+  }
+  input[type="file"]{display:none;}
+
+  .photo-picker{
+    display:flex; flex-direction:column; align-items:center; gap:10px; border:1.5px dashed var(--line);
+    border-radius:12px; padding:22px 16px; text-align:center; background:var(--surface-alt);
+  }
+  .photo-picker svg{width:28px; height:28px; color:var(--muted);}
+  .photo-picker .sub{font-size:0.8rem; color:var(--muted);}
+
+  .photo-frame{
+    position:relative; border-radius:12px; overflow:hidden; border:1px solid var(--line);
+    background:#000; touch-action:manipulation; cursor:crosshair; line-height:0;
+  }
+  .photo-frame img{display:block; width:100%; height:auto; user-select:none; -webkit-user-drag:none;}
+  .marker{
+    position:absolute; width:18px; height:18px; margin:-9px 0 0 -9px; border-radius:50%;
+    background:var(--accent); border:2px solid #fff; box-shadow:0 0 0 1.5px rgba(0,0,0,0.35); pointer-events:none;
+  }
+  .photo-actions{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px; flex-wrap:wrap;}
+  .swap-link{font-size:0.82rem; color:var(--leaf); background:none; border:none; font:inherit; cursor:pointer; padding:4px;}
+
+  .count-row{display:flex; align-items:center; gap:14px; margin-top:14px; flex-wrap:wrap;}
+  .count-display{
+    display:flex; align-items:baseline; gap:6px; background:var(--accent-soft); color:var(--ink);
+    padding:8px 14px; border-radius:10px; font-weight:700;
+  }
+  .count-display .num{font-family:'Fraunces', Georgia, serif; font-size:1.6rem; line-height:1; color:inherit;}
+  .count-display .lbl{font-size:0.78rem; font-weight:600; color:var(--muted);}
+  .count-manual{display:flex; align-items:center; gap:8px; font-size:0.85rem; color:var(--muted);}
+  .count-manual input{width:76px; text-align:center; min-height:38px; padding:6px 8px;}
+
+  .chip-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .chip-grid.chip-grid-3{grid-template-columns:repeat(3,1fr);}
+  @media (max-width:420px){.chip-grid{grid-template-columns:1fr;} .chip-grid.chip-grid-3{grid-template-columns:1fr 1fr;}}
+  .chip{
+    text-align:left; border:1px solid var(--line); background:var(--surface); border-radius:10px;
+    padding:10px 12px; cursor:pointer; font:inherit; display:flex; flex-direction:column; gap:2px; min-height:44px;
+  }
+  .chip .name{font-weight:600; font-size:0.9rem;}
+  .chip .area{font-size:0.78rem; color:var(--muted);}
+  .chip[aria-pressed="true"]{border-color:var(--leaf); background:var(--leaf-soft);}
+  .chip[aria-pressed="true"] .area{color:var(--leaf);}
+  .custom-area{display:flex; align-items:center; gap:8px; margin-top:10px;}
+  .custom-area input{max-width:120px;}
+  .custom-area.is-hidden{display:none;}
+
+  .result-panel{
+    margin-top:16px; padding:14px 16px; border-radius:12px; background:var(--leaf-soft);
+    display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+  }
+  .result-panel .k{font-size:0.8rem; color:var(--muted); margin:0 0 2px;}
+  .result-panel .v{font-family:'Fraunces', Georgia, serif; font-size:1.35rem; font-weight:600; color:var(--ink);}
+
+  .save-row{padding:18px 20px; border-top:1px solid var(--line);}
+  .toast{
+    font-size:0.85rem; color:var(--leaf); margin-top:10px; min-height:1.2em; opacity:0;
+    transform:translateY(-3px); transition:opacity 0.25s ease, transform 0.25s ease;
+  }
+  .toast.show{opacity:1; transform:translateY(0);}
+
+  .section-head{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:12px; padding:0 2px;}
+  .section-head h2{font-size:1.2rem;}
+  .stat{font-size:0.82rem; color:var(--muted);}
+
+  .catalog{display:flex; flex-direction:column; gap:10px;}
+  .entry{display:grid; grid-template-columns:64px 1fr auto; gap:12px; align-items:center; padding:12px; animation:rise 0.25s ease;}
+  @keyframes rise{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+  .entry img{width:64px; height:64px; object-fit:cover; border-radius:9px; border:1px solid var(--line);}
+  .entry .meta .name{font-weight:600; font-size:0.95rem;}
+  .entry .meta .sub{font-size:0.78rem; color:var(--muted); margin-top:2px;}
+  .entry .meta .sub b{color:var(--leaf); font-weight:700;}
+  .entry-actions{display:flex; align-items:center; gap:6px;}
+  .confirm-row{display:flex; align-items:center; gap:6px; font-size:0.78rem;}
+
+  .empty{padding:26px 20px; text-align:center; color:var(--muted); font-size:0.9rem;}
+
+  textarea.export{
+    width:100%; min-height:120px; resize:vertical; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size:0.78rem; color:var(--ink); background:var(--surface-alt); border:1px solid var(--line);
+    border-radius:10px; padding:12px; line-height:1.5;
+  }
+  .export-actions{display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap;}
+
+  /* perfil */
+  .profile-summary{padding:18px 20px; display:flex; gap:14px; align-items:center;}
+  .profile-summary img{width:56px; height:56px; border-radius:10px; object-fit:cover; border:1px solid var(--line); flex:none; background:var(--surface-alt);}
+  .profile-summary .txt{flex:1; min-width:0;}
+  .profile-summary .txt .n{font-weight:700; font-size:1rem;}
+  .profile-summary .txt .s{font-size:0.82rem; color:var(--muted); margin-top:2px;}
+
+  .config-row{padding:16px 20px; border-top:1px solid var(--line); display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .config-row label{font-size:0.85rem; font-weight:600; color:var(--muted);}
+  .config-row input{max-width:110px;}
+
+  .geo-row{display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap;}
+  .tab-dot{display:none; width:7px; height:7px; border-radius:50%; background:var(--accent); margin-left:5px; vertical-align:middle;}
+
+  footer.note{margin-top:30px; padding:0 4px; font-size:0.78rem; color:var(--muted); text-align:center;}
+</style>
+</head>
+<body>
+
+
+<div class="shell">
+
+  <header class="top">
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M12 3c1.8 1.6 2.7 3.4 2.7 5.4 0 2-1.2 3.6-2.7 3.6s-2.7-1.6-2.7-3.6C9.3 6.4 10.2 4.6 12 3z" fill="#3E6B2C"/>
+        <path d="M12 21c-1.8-1.6-2.7-3.4-2.7-5.4 0-2 1.2-3.6 2.7-3.6s2.7 1.6 2.7 3.6c0 2-.9 3.8-2.7 5.4z" fill="#3E6B2C"/>
+        <path d="M3 12c1.6-1.8 3.4-2.7 5.4-2.7 2 0 3.6 1.2 3.6 2.7s-1.6 2.7-3.6 2.7C6.4 14.7 4.6 13.8 3 12z" fill="#3E6B2C"/>
+        <path d="M21 12c-1.6 1.8-3.4 2.7-5.4 2.7-2 0-3.6-1.2-3.6-2.7s1.6-2.7 3.6-2.7c2 0 3.8.9 5.4 2.7z" fill="#3E6B2C"/>
+        <circle cx="12" cy="12" r="2.1" fill="#C98A16"/>
+      </svg>
+    </div>
+    <div>
+      <h1>PoliNido</h1>
+      <p>Floración y nidificación de abejas urbanas — sin cuenta ni login.</p>
+    </div>
+  </header>
+
+  <nav class="tabbar" role="tablist" aria-label="Secciones">
+    <button type="button" class="tab" role="tab" id="tabBtnPerfil" data-tab="perfil" aria-selected="true">Mi jardín</button>
+    <button type="button" class="tab" role="tab" id="tabBtnPlantas" data-tab="plantas" aria-selected="false">Plantas<span class="tab-dot" id="tabDotPlantas" aria-hidden="true"></span></button>
+    <button type="button" class="tab" role="tab" id="tabBtnTrampas" data-tab="trampas" aria-selected="false">Trampas nido<span class="tab-dot" id="tabDotTrampas" aria-hidden="true"></span></button>
+  </nav>
+
+  <!-- ================= PERFIL ================= -->
+  <div class="tabpanel" id="panelPerfil">
+
+    <section class="card" id="profileSummaryCard" style="display:none;">
+      <div class="profile-summary">
+        <img id="profileSummaryImg" src="" alt="">
+        <div class="txt">
+          <div class="n" id="profileSummaryName"></div>
+          <div class="s" id="profileSummarySub"></div>
+        </div>
+        <button type="button" class="btn btn-ghost" id="profileEditBtn">Editar</button>
+      </div>
+    </section>
+
+    <section class="card flow" id="profileFormCard">
+      <div class="step">
+        <div class="step-label"><span class="step-num">1</span>Tu nombre</div>
+        <p class="hint">Así identificamos quién registró cada planta o trampa. No hace falta que sea tu nombre real, ni crear ninguna cuenta.</p>
+        <input type="text" id="pfName" placeholder="ej: Joana">
+      </div>
+      <div class="step">
+        <div class="step-label"><span class="step-num">2</span>Ubicación</div>
+        <p class="hint">Barrio o zona de la ciudad donde está tu jardín.</p>
+        <input type="text" id="pfLocation" placeholder="ej: Barrio Palihue, Bahía Blanca">
+        <div class="geo-row">
+          <button type="button" class="btn" id="pfGeoBtn">Usar mi ubicación actual</button>
+          <span class="toast" id="pfGeoToast" role="status" style="margin-top:0;"></span>
+        </div>
+        <p class="hint" id="pfGeoStatus" style="margin:8px 0 0; display:none;"></p>
+        <p class="hint" style="margin:8px 0 0;">Opcional, además del texto de arriba — ayuda a ubicar tu jardín con precisión en el mapa. Se guarda solo en tu celular y solo se comparte si vos descargás y enviás tus datos.</p>
+      </div>
+      <div class="step">
+        <div class="step-label"><span class="step-num">3</span>Tamaño de tu jardín</div>
+        <div class="chip-grid chip-grid-3" id="pfSizeChips" role="group" aria-label="Tamaño del jardín"></div>
+      </div>
+      <div class="step">
+        <div class="step-label"><span class="step-num">4</span>Foto de tu jardín</div>
+        <p class="hint">Opcional — una vista general para dar contexto.</p>
+        <div id="pfPhotoPickerWrap">
+          <label class="photo-picker" for="pfPhotoInput">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1-1.6A1.5 1.5 0 0 1 10 4.6h4a1.5 1.5 0 0 1 1.3.8l1 1.6h2.2A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5v-9Z"/><circle cx="12" cy="13" r="3.4"/></svg>
+            <span><strong>Elegí o sacá una foto</strong></span>
+            <span class="sub">Opcional</span>
+          </label>
+          <input type="file" id="pfPhotoInput" accept="image/*" capture="environment">
+        </div>
+        <div id="pfPhotoStage" style="display:none;">
+          <div class="photo-frame" id="pfPhotoFrame" data-no-count="true" style="cursor:default;">
+            <img id="pfPhotoImg" src="" alt="Foto de tu jardín">
+          </div>
+          <div class="photo-actions">
+            <button type="button" class="swap-link" id="pfChangePhotoBtn">Cambiar foto</button>
+          </div>
+        </div>
+      </div>
+      <div class="save-row">
+        <button type="button" class="btn btn-primary btn-block" id="pfSaveBtn" disabled>Guardar mi perfil</button>
+        <p class="toast" id="pfToast" role="status"></p>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= PLANTAS ================= -->
+  <div class="tabpanel" id="panelPlantas">
+
+    <div class="notice" id="plantsNotice" style="display:none;">
+      <p>Completá tu perfil en "Mi jardín" antes de registrar una planta.</p>
+      <button type="button" class="btn" data-goto="perfil">Ir a Mi jardín</button>
+    </div>
+
+    <div class="notice" id="plantsReminderNotice" style="display:none;">
+      <p>Hace más de un mes que no registrás una planta nueva. ¿Salís a mirar el jardín esta semana? 🌿</p>
+    </div>
+
+    <section class="card flow" id="plantsFormCard">
+      <div class="step">
+        <div class="step-label"><span class="step-num">1</span>Foto de la planta</div>
+        <p class="hint">Sacale una foto donde se vean bien las flores abiertas.</p>
+        <div id="pPhotoPickerWrap">
+          <label class="photo-picker" for="pPhotoInput">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1-1.6A1.5 1.5 0 0 1 10 4.6h4a1.5 1.5 0 0 1 1.3.8l1 1.6h2.2A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5v-9Z"/><circle cx="12" cy="13" r="3.4"/></svg>
+            <span><strong>Elegí o sacá una foto</strong></span>
+            <span class="sub">JPG o PNG</span>
+          </label>
+          <input type="file" id="pPhotoInput" accept="image/*" capture="environment">
+        </div>
+        <div id="pPhotoStage" style="display:none;">
+          <div class="photo-frame" id="pPhotoFrame">
+            <img id="pPhotoImg" src="" alt="Foto de la planta, tocá una flor para contarla">
+          </div>
+          <div class="photo-actions"><button type="button" class="swap-link" id="pChangePhotoBtn">Cambiar foto</button></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-label"><span class="step-num">2</span>Ponele un nombre</div>
+        <p class="hint">El que quieras — no hace falta el nombre científico.</p>
+        <input type="text" id="pNameInput" placeholder="ej: la rosa de la entrada, planta del balcón...">
+      </div>
+
+      <div class="step">
+        <div class="step-label"><span class="step-num">3</span>Contá las flores</div>
+        <p class="hint">Tocá cada flor en la foto de arriba para marcarla. También podés escribir el número directamente.</p>
+        <div class="count-row">
+          <div class="count-display"><span class="num" id="pCountNum">0</span><span class="lbl">flores</span></div>
+          <button type="button" class="btn btn-ghost" id="pUndoBtn">Deshacer último punto</button>
+          <button type="button" class="btn btn-ghost" id="pResetCountBtn">Reiniciar</button>
+        </div>
+        <div class="count-manual"><label for="pManualCount">o ingresá el número:</label><input type="number" id="pManualCount" min="0" step="1" inputmode="numeric"></div>
+      </div>
+
+      <div class="step">
+        <div class="step-label"><span class="step-num">4</span>Tamaño de la planta</div>
+        <p class="hint">Para estimar el área que ocupa y calcular flores por m².</p>
+        <div class="chip-grid" id="pSizeChips" role="group" aria-label="Tamaño de la planta"></div>
+        <div class="custom-area is-hidden" id="pCustomAreaRow"><label for="pCustomArea">Área en m²:</label><input type="number" id="pCustomArea" min="0.001" step="0.01" inputmode="decimal"></div>
+        <div class="result-panel">
+          <div><p class="k">Área estimada</p><p class="v" id="pAreaOut">—</p></div>
+          <div><p class="k">Densidad floral</p><p class="v" id="pDensityOut">—</p></div>
+        </div>
+      </div>
+
+      <div class="save-row">
+        <button type="button" class="btn btn-primary btn-block" id="pSaveBtn" disabled>Guardar en mi catálogo</button>
+        <p class="toast" id="pSaveToast" role="status"></p>
+      </div>
+    </section>
+
+    <section aria-labelledby="plantsCatalogHeading">
+      <div class="section-head"><h2 id="plantsCatalogHeading">Mis plantas</h2><span class="stat" id="pCatalogStat"></span></div>
+      <div class="card"><div class="catalog" id="pCatalogList"></div><p class="empty" id="pEmptyState">Todavía no registraste ninguna planta.</p></div>
+    </section>
+
+    <section aria-labelledby="plantsExportHeading">
+      <div class="section-head"><h2 id="plantsExportHeading">Juntar los datos del grupo</h2></div>
+      <div class="card" style="padding:18px 20px;">
+        <p class="hint" style="margin-bottom:12px;">Descargá los dos archivos y envíaselos a quien esté armando el catálogo: un CSV con los datos y un PDF con las fotos en el mismo orden (misma referencia F1, F2... en los dos).</p>
+        <div class="export-actions" style="margin-top:0; margin-bottom:14px;">
+          <button type="button" class="btn btn-primary" id="pDownloadBtn">Descargar CSV + PDF de fotos</button>
+          <span class="toast" id="pDownloadToast" role="status" style="margin-top:0;"></span>
+        </div>
+        <p class="hint" style="margin-bottom:8px;">O compartí solo un resumen de texto rápido, sin fotos:</p>
+        <textarea class="export" id="pExportBox" readonly placeholder="Todavía no hay registros para exportar."></textarea>
+        <div class="export-actions"><button type="button" class="btn" id="pCopyBtn">Copiar resumen de texto</button><span class="toast" id="pCopyToast" role="status" style="margin-top:0;"></span></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= TRAMPAS NIDO ================= -->
+  <div class="tabpanel" id="panelTrampas">
+
+    <div class="notice" id="trapsNotice" style="display:none;">
+      <p>Completá tu perfil en "Mi jardín" antes de registrar una trampa nido.</p>
+      <button type="button" class="btn" data-goto="perfil">Ir a Mi jardín</button>
+    </div>
+
+    <div class="notice" id="trapsReminderNotice" style="display:none;">
+      <p>Hace más de un mes que no registrás novedades en las trampas nido. Un vistazo rápido ayuda mucho 🐝</p>
+    </div>
+
+    <section class="card" style="padding:0;">
+      <div class="config-row">
+        <label for="trapTotalNests">Nidos totales del paquete:</label>
+        <input type="number" id="trapTotalNests" min="1" step="1" inputmode="numeric" placeholder="ej: 30">
+        <span class="hint" style="margin:0;">(opcional — para calcular % de ocupación; es el mismo para todos los paquetes)</span>
+      </div>
+    </section>
+
+    <section class="card flow" id="trapsFormCard">
+      <div class="step">
+        <div class="step-label"><span class="step-num">1</span>Foto del paquete de trampas nido</div>
+        <p class="hint">Sacale una foto de frente, donde se vean bien todos los tubos/nidos.</p>
+        <div id="tPhotoPickerWrap">
+          <label class="photo-picker" for="tPhotoInput">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1-1.6A1.5 1.5 0 0 1 10 4.6h4a1.5 1.5 0 0 1 1.3.8l1 1.6h2.2A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5v-9Z"/><circle cx="12" cy="13" r="3.4"/></svg>
+            <span><strong>Elegí o sacá una foto</strong></span>
+            <span class="sub">JPG o PNG</span>
+          </label>
+          <input type="file" id="tPhotoInput" accept="image/*" capture="environment">
+        </div>
+        <div id="tPhotoStage" style="display:none;">
+          <div class="photo-frame" id="tPhotoFrame">
+            <img id="tPhotoImg" src="" alt="Foto del paquete de trampas nido, tocá cada nido ocupado">
+          </div>
+          <div class="photo-actions"><button type="button" class="swap-link" id="tChangePhotoBtn">Cambiar foto</button></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-label"><span class="step-num">2</span>Identificá el paquete</div>
+        <p class="hint">Opcional — útil si tenés más de un paquete en tu jardín.</p>
+        <input type="text" id="tNameInput" placeholder="ej: paquete cerca del limonero">
+      </div>
+
+      <div class="step">
+        <div class="step-label"><span class="step-num">3</span>Contá los nidos ocupados</div>
+        <p class="hint">Tocá cada nido tapado/ocupado en la foto de arriba para marcarlo. También podés escribir el número directamente.</p>
+        <div class="count-row">
+          <div class="count-display"><span class="num" id="tCountNum">0</span><span class="lbl">nidos ocupados</span></div>
+          <button type="button" class="btn btn-ghost" id="tUndoBtn">Deshacer último punto</button>
+          <button type="button" class="btn btn-ghost" id="tResetCountBtn">Reiniciar</button>
+        </div>
+        <div class="count-manual"><label for="tManualCount">o ingresá el número:</label><input type="number" id="tManualCount" min="0" step="1" inputmode="numeric"></div>
+        <div class="result-panel">
+          <div><p class="k">Ocupación</p><p class="v" id="tOccupancyOut">—</p></div>
+        </div>
+      </div>
+
+      <div class="save-row">
+        <button type="button" class="btn btn-primary btn-block" id="tSaveBtn" disabled>Guardar en mi catálogo</button>
+        <p class="toast" id="tSaveToast" role="status"></p>
+      </div>
+    </section>
+
+    <section aria-labelledby="trapsCatalogHeading">
+      <div class="section-head"><h2 id="trapsCatalogHeading">Mis trampas nido</h2><span class="stat" id="tCatalogStat"></span></div>
+      <div class="card"><div class="catalog" id="tCatalogList"></div><p class="empty" id="tEmptyState">Todavía no registraste ninguna trampa nido.</p></div>
+    </section>
+
+    <section aria-labelledby="trapsExportHeading">
+      <div class="section-head"><h2 id="trapsExportHeading">Juntar los datos del grupo</h2></div>
+      <div class="card" style="padding:18px 20px;">
+        <p class="hint" style="margin-bottom:12px;">Igual que con las plantas: descargá el CSV con los datos y el PDF con las fotos, mismas referencias (T1, T2...) en los dos.</p>
+        <div class="export-actions" style="margin-top:0; margin-bottom:14px;">
+          <button type="button" class="btn btn-primary" id="tDownloadBtn">Descargar CSV + PDF de fotos</button>
+          <span class="toast" id="tDownloadToast" role="status" style="margin-top:0;"></span>
+        </div>
+        <p class="hint" style="margin-bottom:8px;">O compartí solo un resumen de texto rápido, sin fotos:</p>
+        <textarea class="export" id="tExportBox" readonly placeholder="Todavía no hay registros para exportar."></textarea>
+        <div class="export-actions"><button type="button" class="btn" id="tCopyBtn">Copiar resumen de texto</button><span class="toast" id="tCopyToast" role="status" style="margin-top:0;"></span></div>
+      </div>
+    </section>
+  </div>
+
+  <footer class="note">Prototipo de PoliNido · todo pasa en tu navegador, no se manda nada a ningún servidor.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* =====================================================================
+     HELPERS COMPARTIDOS
+     ===================================================================== */
+
+  function $(id){ return document.getElementById(id); }
+
+  function showToast(el, msg){
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(el._t);
+    el._t = setTimeout(function(){ el.classList.remove("show"); }, 2600);
+  }
+
+  function fmtDate(iso){
+    try{ return new Date(iso).toLocaleDateString("es-AR", {day:"2-digit", month:"2-digit", year:"numeric"}); }
+    catch(e){ return ""; }
+  }
+
+  function slug(s){
+    return (s || "catalogo").toString().normalize("NFD").replace(/[̀-ͯ]/g,"")
+      .replace(/[^a-zA-Z0-9]+/g,"_").replace(/^_+|_+$/g,"").toLowerCase() || "catalogo";
+  }
+
+  function safeGet(key){ try{ return localStorage.getItem(key); }catch(e){ return null; } }
+  function safeSet(key, val){ try{ localStorage.setItem(key, val); }catch(e){} }
+
+  function csvEscape(v){
+    var s = (v == null) ? "" : String(v);
+    if(/[",\n]/.test(s)){ s = '"' + s.replace(/"/g, '""') + '"'; }
+    return s;
+  }
+  function buildCsvGeneric(header, rows){
+    var lines = rows.map(function(r){ return r.map(csvEscape).join(","); });
+    return "﻿" + header.join(",") + "\n" + lines.join("\n") + "\n";
+  }
+
+  /* ---- generador de PDF mínimo, sin librerías externas ---- */
+  function dataUrlToBytes(dataUrl){
+    var base64 = dataUrl.split(",")[1] || "";
+    var bin = atob(base64);
+    var bytes = new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++){ bytes[i] = bin.charCodeAt(i); }
+    return bytes;
+  }
+  function strBytes(s){
+    var out = new Uint8Array(s.length);
+    for(var i=0;i<s.length;i++){ out[i] = s.charCodeAt(i) & 0xFF; }
+    return out;
+  }
+  function pdfLiteralBytes(str){
+    var out = [];
+    for(var i=0;i<str.length;i++){
+      var code = str.charCodeAt(i);
+      if(code > 255) code = 63;
+      if(code === 40 || code === 41 || code === 92){ out.push(92); }
+      out.push(code);
+    }
+    return new Uint8Array(out);
+  }
+  function concatBytes(list){
+    var total = 0;
+    for(var i=0;i<list.length;i++){ total += list[i].length; }
+    var out = new Uint8Array(total);
+    var pos = 0;
+    for(var j=0;j<list.length;j++){ out.set(list[j], pos); pos += list[j].length; }
+    return out;
+  }
+  function pad10(n){
+    var s = String(Math.round(n));
+    while(s.length < 10) s = "0" + s;
+    return s;
+  }
+  function noSup2(s){ return (s||"").replace(/²/g, "2"); }
+
+  /** pages: [{photo, photoW, photoH, line1, line2}, ...] -> Uint8Array de un PDF válido, una página A4 por foto */
+  function buildPdfGeneric(pages){
+    var PAGE_W = 595.28, PAGE_H = 841.89, MARGIN = 40, TOP_LABEL_AREA = 74;
+    var chunks = [];
+    var offset = 0;
+    var offsets = [];
+
+    function push(part){
+      var bytes = (typeof part === "string") ? strBytes(part) : part;
+      chunks.push(bytes);
+      offset += bytes.length;
+    }
+    function beginObj(num){ offsets[num] = offset; push(num + " 0 obj\n"); }
+    function endObj(){ push("\nendobj\n"); }
+
+    var totalPages = pages.length;
+    var totalObjs = 3 + totalPages * 3;
+
+    push("%PDF-1.4\n");
+    beginObj(1); push("<< /Type /Catalog /Pages 2 0 R >>"); endObj();
+
+    var kids = [];
+    for(var k=0;k<totalPages;k++){ kids.push((4 + k*3) + " 0 R"); }
+    beginObj(2); push("<< /Type /Pages /Kids [" + kids.join(" ") + "] /Count " + totalPages + " >>"); endObj();
+
+    beginObj(3); push("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>"); endObj();
+
+    for(var i=0;i<totalPages;i++){
+      var pg = pages[i];
+      var pageNum = 4 + i*3, contentNum = pageNum + 1, imgNum = pageNum + 2;
+      var imgW = pg.photoW || 900, imgH = pg.photoH || 600;
+      var availW = PAGE_W - 2*MARGIN;
+      var availH = PAGE_H - 2*MARGIN - TOP_LABEL_AREA;
+      var scale = Math.min(availW/imgW, availH/imgH);
+      var drawW = imgW*scale, drawH = imgH*scale;
+      var x = MARGIN + (availW-drawW)/2;
+      var y = MARGIN + (availH-drawH)/2;
+
+      var streamParts = [];
+      streamParts.push(strBytes("BT /F1 12 Tf 1 0 0 1 " + MARGIN + " " + (PAGE_H-34).toFixed(1) + " Tm ("));
+      streamParts.push(pdfLiteralBytes(pg.line1 || ""));
+      streamParts.push(strBytes(") Tj ET\n"));
+      streamParts.push(strBytes("BT /F1 10 Tf 1 0 0 1 " + MARGIN + " " + (PAGE_H-50).toFixed(1) + " Tm ("));
+      streamParts.push(pdfLiteralBytes(pg.line2 || ""));
+      streamParts.push(strBytes(") Tj ET\n"));
+      streamParts.push(strBytes("q " + drawW.toFixed(2) + " 0 0 " + drawH.toFixed(2) + " " + x.toFixed(2) + " " + y.toFixed(2) + " cm /Im0 Do Q\n"));
+      var streamBody = concatBytes(streamParts);
+
+      beginObj(pageNum);
+      push("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + PAGE_W + " " + PAGE_H + "] /Resources << /Font << /F1 3 0 R >> /XObject << /Im0 " + imgNum + " 0 R >> >> /Contents " + contentNum + " 0 R >>");
+      endObj();
+
+      beginObj(contentNum);
+      push("<< /Length " + streamBody.length + " >>\nstream\n");
+      push(streamBody);
+      push("\nendstream");
+      endObj();
+
+      var imgBytes = dataUrlToBytes(pg.photo);
+      beginObj(imgNum);
+      push("<< /Type /XObject /Subtype /Image /Width " + imgW + " /Height " + imgH + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + imgBytes.length + " >>\nstream\n");
+      push(imgBytes);
+      push("\nendstream");
+      endObj();
+    }
+
+    var xrefStart = offset;
+    push("xref\n0 " + (totalObjs+1) + "\n0000000000 65535 f \n");
+    for(var n=1;n<=totalObjs;n++){ push(pad10(offsets[n]) + " 00000 n \n"); }
+    push("trailer\n<< /Size " + (totalObjs+1) + " /Root 1 0 R >>\nstartxref\n" + xrefStart + "\n%%EOF");
+
+    return concatBytes(chunks);
+  }
+
+  function browserDownload(filename, blob){
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+  }
+  function saveFile(filename, blob){
+    function viaBrowser(){
+      return new Promise(function(resolve, reject){
+        try{ browserDownload(filename, blob); resolve({status:"saved"}); }
+        catch(e){ reject(e); }
+      });
+    }
+    if(window.claude && typeof window.claude.use === "function"){
+      return window.claude.use("downloads").then(function(downloads){
+        if(!downloads) return viaBrowser();
+        return downloads.save({filename: filename, data: blob});
+      }).catch(viaBrowser);
+    }
+    return viaBrowser();
+  }
+
+  function copyText(text, toastEl){
+    if(!text){ showToast(toastEl, "Todavía no hay nada para copiar."); return; }
+    function fallback(){
+      var ta = document.createElement("textarea");
+      ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      try{ document.execCommand("copy"); showToast(toastEl, "Copiado."); }
+      catch(e){ showToast(toastEl, "No se pudo copiar automáticamente."); }
+      ta.remove();
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ showToast(toastEl, "Copiado."); }).catch(fallback);
+    } else { fallback(); }
+  }
+
+  /* ---- módulo genérico de foto + conteo por toque ---- */
+  function makePhotoCounter(dom){
+    var state = { photoDataUrl:null, photoW:0, photoH:0, markers:[] };
+    var listeners = [];
+
+    function fire(){ listeners.forEach(function(fn){ fn(); }); }
+
+    function clearMarkers(){
+      state.markers = [];
+      Array.prototype.slice.call(dom.frame.querySelectorAll(".marker")).forEach(function(m){ m.remove(); });
+      if(dom.manualCount){ dom.manualCount.value = 0; }
+      if(dom.countNum){ dom.countNum.textContent = "0"; }
+    }
+    function syncFromMarkers(){
+      if(dom.manualCount){ dom.manualCount.value = state.markers.length; }
+      if(dom.countNum){ dom.countNum.textContent = String(state.markers.length); }
+    }
+    function addMarker(xPct, yPct){
+      state.markers.push({x:xPct, y:yPct});
+      var dot = document.createElement("div");
+      dot.className = "marker"; dot.style.left = xPct + "%"; dot.style.top = yPct + "%";
+      dom.frame.appendChild(dot);
+      syncFromMarkers();
+      fire();
+    }
+
+    dom.fileInput.addEventListener("change", function(ev){
+      var file = ev.target.files && ev.target.files[0];
+      if(!file) return;
+      var reader = new FileReader();
+      reader.onload = function(){
+        var img = new Image();
+        img.onload = function(){
+          var maxDim = 900;
+          var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+          var w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+          var canvas = document.createElement("canvas");
+          canvas.width = w; canvas.height = h;
+          canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+          state.photoDataUrl = canvas.toDataURL("image/jpeg", 0.72);
+          state.photoW = w; state.photoH = h;
+          dom.img.src = state.photoDataUrl;
+          dom.pickerWrap.style.display = "none";
+          dom.stage.style.display = "block";
+          clearMarkers();
+          fire();
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    dom.changeBtn.addEventListener("click", function(){
+      state.photoDataUrl = null;
+      dom.fileInput.value = "";
+      dom.stage.style.display = "none";
+      dom.pickerWrap.style.display = "flex";
+      clearMarkers();
+      fire();
+    });
+
+    if(dom.frame.hasAttribute("data-no-count")){
+      // foto de perfil: sin conteo, solo picker
+    } else {
+      dom.frame.addEventListener("click", function(ev){
+        if(!state.photoDataUrl) return;
+        var rect = dom.frame.getBoundingClientRect();
+        var xPct = ((ev.clientX - rect.left) / rect.width) * 100;
+        var yPct = ((ev.clientY - rect.top) / rect.height) * 100;
+        addMarker(Math.max(0, Math.min(100, xPct)), Math.max(0, Math.min(100, yPct)));
+      });
+      dom.undoBtn.addEventListener("click", function(){
+        if(!state.markers.length) return;
+        state.markers.pop();
+        var dots = dom.frame.querySelectorAll(".marker");
+        if(dots.length) dots[dots.length-1].remove();
+        syncFromMarkers();
+        fire();
+      });
+      dom.resetBtn.addEventListener("click", function(){ clearMarkers(); fire(); });
+      dom.manualCount.addEventListener("input", function(){
+        dom.countNum.textContent = String(getCount());
+        fire();
+      });
+    }
+
+    function getCount(){
+      var v = parseInt(dom.manualCount ? dom.manualCount.value : 0, 10);
+      return isNaN(v) || v < 0 ? 0 : v;
+    }
+
+    return {
+      hasPhoto: function(){ return !!state.photoDataUrl; },
+      getPhoto: function(){ return {dataUrl: state.photoDataUrl, w: state.photoW, h: state.photoH}; },
+      getCount: getCount,
+      onChange: function(fn){ listeners.push(fn); },
+      reset: function(){
+        state.photoDataUrl = null;
+        dom.fileInput.value = "";
+        dom.stage.style.display = "none";
+        dom.pickerWrap.style.display = "flex";
+        if(!dom.frame.hasAttribute("data-no-count")) clearMarkers();
+      },
+      setPhoto: function(dataUrl, w, h){
+        state.photoDataUrl = dataUrl; state.photoW = w; state.photoH = h;
+        dom.img.src = dataUrl;
+        dom.pickerWrap.style.display = "none";
+        dom.stage.style.display = "block";
+      }
+    };
+  }
+
+  /* =====================================================================
+     TABS
+     ===================================================================== */
+  var tabButtons = Array.prototype.slice.call(document.querySelectorAll(".tab"));
+  var panels = { perfil: $("panelPerfil"), plantas: $("panelPlantas"), trampas: $("panelTrampas") };
+
+  function activateTab(name){
+    tabButtons.forEach(function(b){ b.setAttribute("aria-selected", b.dataset.tab === name ? "true" : "false"); });
+    Object.keys(panels).forEach(function(k){ panels[k].classList.toggle("active", k === name); });
+    refreshGates();
+  }
+  tabButtons.forEach(function(b){ b.addEventListener("click", function(){ activateTab(b.dataset.tab); }); });
+  Array.prototype.slice.call(document.querySelectorAll("[data-goto]")).forEach(function(b){
+    b.addEventListener("click", function(){ activateTab(b.dataset.goto); });
+  });
+
+  /* =====================================================================
+     PERFIL
+     ===================================================================== */
+  var PROFILE_KEY = "florecer_perfil_v1";
+  var GARDEN_SIZES = [
+    {id:"chico", name:"Chico"},
+    {id:"mediano", name:"Mediano"},
+    {id:"grande", name:"Grande"}
+  ];
+
+  var profile = { name:"", location:"", gardenSize:"", photo:null, photoW:0, photoH:0, lat:null, lon:null, createdAt:null };
+
+  function loadProfile(){
+    try{
+      var raw = safeGet(PROFILE_KEY);
+      if(raw) profile = JSON.parse(raw);
+    }catch(e){}
+  }
+  function persistProfile(){ safeSet(PROFILE_KEY, JSON.stringify(profile)); }
+  function hasProfile(){ return !!(profile && profile.name && profile.name.trim()); }
+
+  var pfPhoto = makePhotoCounter({
+    pickerWrap: $("pfPhotoPickerWrap"), fileInput: $("pfPhotoInput"), stage: $("pfPhotoStage"),
+    frame: $("pfPhotoFrame"), img: $("pfPhotoImg"), changeBtn: $("pfChangePhotoBtn")
+  });
+
+  function renderGeoStatus(){
+    var el = $("pfGeoStatus");
+    if(profile.lat != null && profile.lon != null){
+      el.style.display = "block";
+      el.textContent = "📍 Ubicación guardada: " + profile.lat.toFixed(4) + ", " + profile.lon.toFixed(4) + ".";
+    } else {
+      el.style.display = "none";
+      el.textContent = "";
+    }
+  }
+
+  $("pfGeoBtn").addEventListener("click", function(){
+    if(!navigator.geolocation){
+      showToast($("pfGeoToast"), "Este navegador no permite usar el GPS acá.");
+      return;
+    }
+    if(window.isSecureContext === false){
+      showToast($("pfGeoToast"), "El GPS solo funciona abriendo la app desde el enlace (no como archivo descargado).");
+      return;
+    }
+    showToast($("pfGeoToast"), "Buscando tu ubicación...");
+    navigator.geolocation.getCurrentPosition(function(pos){
+      profile.lat = pos.coords.latitude;
+      profile.lon = pos.coords.longitude;
+      persistProfile();
+      renderGeoStatus();
+      showToast($("pfGeoToast"), "¡Listo! Ubicación guardada.");
+    }, function(err){
+      var msg = "No se pudo obtener tu ubicación.";
+      if(err && err.code === 1) msg = "Le dijiste que no al permiso de ubicación — podés escribir el barrio a mano arriba.";
+      else if(err && err.code === 2) msg = "No se pudo detectar tu ubicación ahora. Probá de nuevo o escribí el barrio a mano.";
+      else if(err && err.code === 3) msg = "Tardó demasiado en responder. Probá de nuevo.";
+      showToast($("pfGeoToast"), msg);
+    }, {enableHighAccuracy:true, timeout:10000, maximumAge:60000});
+  });
+
+  function buildPfSizeChips(){
+    var wrap = $("pfSizeChips");
+    wrap.innerHTML = "";
+    GARDEN_SIZES.forEach(function(sz){
+      var chip = document.createElement("button");
+      chip.type = "button"; chip.className = "chip"; chip.setAttribute("aria-pressed", "false");
+      chip.dataset.id = sz.id;
+      chip.innerHTML = '<span class="name">' + sz.name + '</span>';
+      chip.addEventListener("click", function(){
+        profile.gardenSize = sz.id;
+        Array.prototype.slice.call(wrap.querySelectorAll(".chip")).forEach(function(c){
+          c.setAttribute("aria-pressed", c === chip ? "true" : "false");
+        });
+        updatePfSaveEnabled();
+      });
+      wrap.appendChild(chip);
+    });
+  }
+  function updatePfSaveEnabled(){
+    $("pfSaveBtn").disabled = !($("pfName").value.trim().length > 0);
+  }
+
+  function renderProfileSummary(){
+    var show = hasProfile();
+    $("profileSummaryCard").style.display = show ? "block" : "none";
+    $("profileFormCard").style.display = show ? "none" : "block";
+    if(!show) return;
+    var sizeName = (GARDEN_SIZES.filter(function(s){return s.id===profile.gardenSize;})[0]||{}).name || "sin especificar";
+    $("profileSummaryName").textContent = profile.name;
+    $("profileSummarySub").textContent = (profile.location || "sin ubicación") + " · jardín " + sizeName.toLowerCase();
+    if(profile.photo){ $("profileSummaryImg").src = profile.photo; $("profileSummaryImg").style.display = "block"; }
+    else { $("profileSummaryImg").removeAttribute("src"); $("profileSummaryImg").style.display = "none"; }
+  }
+
+  $("profileEditBtn").addEventListener("click", function(){
+    $("pfName").value = profile.name || "";
+    $("pfLocation").value = profile.location || "";
+    Array.prototype.slice.call($("pfSizeChips").querySelectorAll(".chip")).forEach(function(c){
+      c.setAttribute("aria-pressed", c.dataset.id === profile.gardenSize ? "true" : "false");
+    });
+    if(profile.photo){ pfPhoto.setPhoto(profile.photo, profile.photoW, profile.photoH); }
+    renderGeoStatus();
+    $("profileFormCard").style.display = "block";
+    $("profileSummaryCard").style.display = "none";
+    updatePfSaveEnabled();
+  });
+
+  $("pfName").addEventListener("input", updatePfSaveEnabled);
+
+  $("pfSaveBtn").addEventListener("click", function(){
+    if(!$("pfName").value.trim()) return;
+    profile.name = $("pfName").value.trim();
+    profile.location = $("pfLocation").value.trim();
+    var photo = pfPhoto.getPhoto();
+    if(photo.dataUrl){ profile.photo = photo.dataUrl; profile.photoW = photo.w; profile.photoH = photo.h; }
+    if(!profile.createdAt){ profile.createdAt = new Date().toISOString(); }
+    persistProfile();
+    renderProfileSummary();
+    renderGeoStatus();
+    showToast($("pfToast"), "Perfil guardado.");
+    refreshGates();
+    renderPlantsCatalog();
+    renderTrapsCatalog();
+  });
+
+  var REMINDER_DAYS = 30;
+  function daysSince(iso){
+    if(!iso) return Infinity;
+    var t = new Date(iso).getTime();
+    if(isNaN(t)) return Infinity;
+    return (Date.now() - t) / 86400000;
+  }
+  function lastPlantActivity(){
+    return plantsState.entries.length ? plantsState.entries[0].savedAt : (profile.createdAt || null);
+  }
+  function lastTrapActivity(){
+    return trapsState.entries.length ? trapsState.entries[0].savedAt : (profile.createdAt || null);
+  }
+  function refreshReminders(){
+    var ok = hasProfile();
+    var showP = ok && daysSince(lastPlantActivity()) >= REMINDER_DAYS;
+    var showT = ok && daysSince(lastTrapActivity()) >= REMINDER_DAYS;
+    $("plantsReminderNotice").style.display = showP ? "flex" : "none";
+    $("trapsReminderNotice").style.display = showT ? "flex" : "none";
+    $("tabDotPlantas").style.display = showP ? "inline-block" : "none";
+    $("tabDotTrampas").style.display = showT ? "inline-block" : "none";
+  }
+
+  function refreshGates(){
+    var ok = hasProfile();
+    $("plantsNotice").style.display = ok ? "none" : "flex";
+    $("plantsFormCard").style.display = ok ? "block" : "none";
+    $("trapsNotice").style.display = ok ? "none" : "flex";
+    $("trapsFormCard").style.display = ok ? "block" : "none";
+    updatePlantsSaveEnabled();
+    updateTrapsSaveEnabled();
+    refreshReminders();
+  }
+
+  /* =====================================================================
+     PLANTAS
+     ===================================================================== */
+  var PLANTS_KEY = "florecer_plantas_v1";
+  var SIZE_CATEGORIES = [
+    { id:"maceta-chica", name:"Maceta chica", area:0.03 },
+    { id:"maceta-grande", name:"Maceta grande / cantero chico", area:0.15 },
+    { id:"arbusto-chico", name:"Arbusto chico", area:0.5 },
+    { id:"arbusto-grande", name:"Arbusto grande", area:2 },
+    { id:"trepadora", name:"Trepadora / pared cubierta", area:8 },
+    { id:"arbol", name:"Árbol o seto grande", area:20 },
+    { id:"otro", name:"Otro (ingresar área)", area:null }
+  ];
+  var plantsState = { entries: [], selectedSize: null, customArea: null };
+
+  function loadPlants(){ try{ var raw = safeGet(PLANTS_KEY); plantsState.entries = raw ? JSON.parse(raw) : []; }catch(e){ plantsState.entries = []; } }
+  function persistPlants(){ safeSet(PLANTS_KEY, JSON.stringify(plantsState.entries)); }
+
+  var pPhoto = makePhotoCounter({
+    pickerWrap: $("pPhotoPickerWrap"), fileInput: $("pPhotoInput"), stage: $("pPhotoStage"),
+    frame: $("pPhotoFrame"), img: $("pPhotoImg"), changeBtn: $("pChangePhotoBtn"),
+    countNum: $("pCountNum"), undoBtn: $("pUndoBtn"), resetBtn: $("pResetCountBtn"), manualCount: $("pManualCount")
+  });
+  pPhoto.onChange(function(){ renderPlantResult(); });
+
+  function fmtArea(a){
+    if(a == null) return "—";
+    if(a < 1) return (a*10000).toFixed(0) + " cm² (~" + a + " m²)";
+    return a + " m²";
+  }
+  function fmtDensity(count, area){
+    if(!area || area <= 0) return "—";
+    var d = count / area;
+    return d.toFixed(d < 10 ? 1 : 0) + " flores/m²";
+  }
+  function plantCategoryName(id){
+    var cat = SIZE_CATEGORIES.filter(function(c){ return c.id === id; })[0];
+    return cat ? cat.name : "";
+  }
+  function currentPlantArea(){
+    if(plantsState.selectedSize === "otro"){ return plantsState.customArea && plantsState.customArea > 0 ? plantsState.customArea : null; }
+    var cat = SIZE_CATEGORIES.filter(function(c){ return c.id === plantsState.selectedSize; })[0];
+    return cat ? cat.area : null;
+  }
+
+  function buildPlantSizeChips(){
+    var wrap = $("pSizeChips");
+    wrap.innerHTML = "";
+    SIZE_CATEGORIES.forEach(function(cat){
+      var chip = document.createElement("button");
+      chip.type = "button"; chip.className = "chip"; chip.setAttribute("aria-pressed", "false"); chip.dataset.id = cat.id;
+      chip.innerHTML = '<span class="name">'+cat.name+'</span><span class="area">'+(cat.area!=null ? "~"+fmtArea(cat.area) : "vos elegís el área") +'</span>';
+      chip.addEventListener("click", function(){
+        plantsState.selectedSize = cat.id;
+        Array.prototype.slice.call(wrap.querySelectorAll(".chip")).forEach(function(c){ c.setAttribute("aria-pressed", c === chip ? "true" : "false"); });
+        $("pCustomAreaRow").classList.toggle("is-hidden", cat.id !== "otro");
+        if(cat.id === "otro") $("pCustomArea").focus();
+        renderPlantResult();
+      });
+      wrap.appendChild(chip);
+    });
+  }
+  $("pCustomArea").addEventListener("input", function(){
+    var v = parseFloat($("pCustomArea").value);
+    plantsState.customArea = isNaN(v) ? null : v;
+    renderPlantResult();
+  });
+
+  function renderPlantResult(){
+    var area = currentPlantArea();
+    var count = pPhoto.getCount();
+    $("pAreaOut").textContent = fmtArea(area);
+    $("pDensityOut").textContent = fmtDensity(count, area);
+    updatePlantsSaveEnabled();
+  }
+  function updatePlantsSaveEnabled(){
+    var ok = hasProfile() && pPhoto.hasPhoto() && $("pNameInput").value.trim().length > 0 && currentPlantArea() != null;
+    $("pSaveBtn").disabled = !ok;
+  }
+  $("pNameInput").addEventListener("input", updatePlantsSaveEnabled);
+
+  function resetPlantForm(){
+    pPhoto.reset();
+    $("pNameInput").value = "";
+    plantsState.selectedSize = null;
+    plantsState.customArea = null;
+    $("pCustomArea").value = "";
+    $("pCustomAreaRow").classList.add("is-hidden");
+    Array.prototype.slice.call($("pSizeChips").querySelectorAll(".chip")).forEach(function(c){ c.setAttribute("aria-pressed","false"); });
+    renderPlantResult();
+  }
+
+  $("pSaveBtn").addEventListener("click", function(){
+    var area = currentPlantArea();
+    var count = pPhoto.getCount();
+    var photo = pPhoto.getPhoto();
+    if(!hasProfile() || !photo.dataUrl || !$("pNameInput").value.trim() || area == null) return;
+    var entry = {
+      id: "p" + Date.now() + Math.random().toString(16).slice(2),
+      usuario: profile.name, ubicacion: profile.location, lat: profile.lat, lon: profile.lon, tamanoJardin: profile.gardenSize,
+      name: $("pNameInput").value.trim(),
+      photo: photo.dataUrl, photoW: photo.w, photoH: photo.h,
+      count: count, sizeCategory: plantsState.selectedSize, area: area,
+      density: area > 0 ? count/area : null, savedAt: new Date().toISOString()
+    };
+    plantsState.entries.unshift(entry);
+    persistPlants();
+    renderPlantsCatalog();
+    showToast($("pSaveToast"), "Guardado — ya está en tu catálogo, más abajo.");
+    resetPlantForm();
+  });
+
+  function orderedPlants(){ return plantsState.entries.slice().reverse(); }
+
+  function renderPlantsCatalog(){
+    var list = $("pCatalogList");
+    list.innerHTML = "";
+    if(!plantsState.entries.length){ $("pEmptyState").style.display = "block"; }
+    else{
+      $("pEmptyState").style.display = "none";
+      plantsState.entries.forEach(function(entry){ list.appendChild(buildPlantCard(entry)); });
+    }
+    var n = plantsState.entries.length;
+    if(n){
+      var avg = plantsState.entries.reduce(function(s,e){ return s+(e.density||0); },0)/n;
+      $("pCatalogStat").textContent = n + (n===1?" planta registrada":" plantas registradas") + " · promedio " + avg.toFixed(1) + " flores/m²";
+    } else { $("pCatalogStat").textContent = ""; }
+    renderPlantExport();
+    if(typeof refreshReminders === "function") refreshReminders();
+  }
+
+  function buildPlantCard(entry){
+    var row = document.createElement("div");
+    row.className = "entry"; row.dataset.id = entry.id;
+    var img = document.createElement("img"); img.src = entry.photo; img.alt = entry.name;
+    row.appendChild(img);
+    var meta = document.createElement("div"); meta.className = "meta";
+    var nameEl = document.createElement("div"); nameEl.className = "name"; nameEl.textContent = entry.name;
+    var subEl = document.createElement("div"); subEl.className = "sub";
+    subEl.innerHTML = entry.count + " flores · " + fmtArea(entry.area) + " · <b>" + fmtDensity(entry.count, entry.area) + "</b>";
+    var subEl2 = document.createElement("div"); subEl2.className = "sub";
+    subEl2.textContent = (plantCategoryName(entry.sizeCategory) || "área personalizada") + " · " + fmtDate(entry.savedAt) + " · registró " + (entry.usuario || "—");
+    meta.appendChild(nameEl); meta.appendChild(subEl); meta.appendChild(subEl2);
+    row.appendChild(meta);
+    row.appendChild(buildDeleteActions(function(){
+      plantsState.entries = plantsState.entries.filter(function(e){ return e.id !== entry.id; });
+      persistPlants(); renderPlantsCatalog();
+    }));
+    return row;
+  }
+
+  function buildDeleteActions(onConfirm){
+    var actions = document.createElement("div"); actions.className = "entry-actions";
+    var delBtn = document.createElement("button");
+    delBtn.type = "button"; delBtn.className = "btn btn-ghost"; delBtn.textContent = "Eliminar";
+    delBtn.addEventListener("click", function(){
+      actions.innerHTML = "";
+      var row = document.createElement("div"); row.className = "confirm-row";
+      var q = document.createElement("span"); q.textContent = "¿Eliminar?";
+      var yes = document.createElement("button"); yes.type="button"; yes.className="btn btn-danger"; yes.textContent="Sí";
+      yes.addEventListener("click", onConfirm);
+      var no = document.createElement("button"); no.type="button"; no.className="btn btn-ghost"; no.textContent="No";
+      no.addEventListener("click", function(){ actions.innerHTML = ""; actions.appendChild(delBtn); });
+      row.appendChild(q); row.appendChild(yes); row.appendChild(no);
+      actions.appendChild(row);
+    });
+    actions.appendChild(delBtn);
+    return actions;
+  }
+
+  function renderPlantExport(){
+    var ordered = orderedPlants();
+    if(!ordered.length){ $("pExportBox").value = ""; return; }
+    $("pExportBox").value = ordered.map(function(e,i){
+      return ["F"+(i+1), fmtDate(e.savedAt), e.usuario||"—", e.name, e.count+" flores", fmtArea(e.area), fmtDensity(e.count,e.area)].join(" — ");
+    }).join("\n");
+  }
+  $("pCopyBtn").addEventListener("click", function(){ copyText($("pExportBox").value, $("pCopyToast")); });
+
+  function buildPlantsCsv(){
+    var ordered = orderedPlants();
+    var header = ["ref_foto","fecha","usuario","ubicacion","lat","lon","tamano_jardin","nombre_planta","flores","categoria_tamano","area_m2","densidad_flores_m2"];
+    var rows = ordered.map(function(e,i){
+      return ["F"+(i+1), fmtDate(e.savedAt), e.usuario||"", e.ubicacion||"", (e.lat!=null?e.lat:""), (e.lon!=null?e.lon:""), e.tamanoJardin||"", e.name||"", e.count,
+        plantCategoryName(e.sizeCategory) || "área personalizada", e.area, (e.area ? (e.count/e.area).toFixed(2) : "")];
+    });
+    return buildCsvGeneric(header, rows);
+  }
+  function buildPlantsPdf(){
+    var ordered = orderedPlants();
+    return buildPdfGeneric(ordered.map(function(e,i){
+      return {
+        photo: e.photo, photoW: e.photoW, photoH: e.photoH,
+        line1: "Foto F" + (i+1) + "   ·   " + fmtDate(e.savedAt) + "   ·   registró " + (e.usuario||"—"),
+        line2: e.name + "   ·   " + e.count + " flores   ·   " + noSup2(fmtArea(e.area)) + "   ·   " + noSup2(fmtDensity(e.count, e.area))
+      };
+    }));
+  }
+
+  $("pDownloadBtn").addEventListener("click", function(){
+    if(!plantsState.entries.length){ showToast($("pDownloadToast"), "Todavía no hay registros para descargar."); return; }
+    var csvText, pdfBytes;
+    try{ csvText = buildPlantsCsv(); pdfBytes = buildPlantsPdf(); }
+    catch(e){ showToast($("pDownloadToast"), "No se pudieron generar los archivos."); return; }
+    var base = slug(profile.name) + "_" + plantsState.entries.length + "reg";
+    showToast($("pDownloadToast"), "Descargando el CSV...");
+    saveFile("polinido_plantas_" + base + ".csv", new Blob([csvText], {type:"text/csv"})).then(function(){
+      showToast($("pDownloadToast"), "CSV listo. Ahora el PDF de fotos...");
+      return saveFile("polinido_plantas_fotos_" + base + ".pdf", new Blob([pdfBytes], {type:"application/pdf"}));
+    }).then(function(){
+      showToast($("pDownloadToast"), "Listo — mandale los dos archivos a quien arma el catálogo.");
+    }).catch(function(){
+      showToast($("pDownloadToast"), "No se pudo completar la descarga acá. Probá con el resumen de texto o el archivo .html independiente.");
+    });
+  });
+
+  /* =====================================================================
+     TRAMPAS NIDO
+     ===================================================================== */
+  var TRAPS_KEY = "florecer_trampas_v1";
+  var TRAPS_TOTAL_KEY = "florecer_trampas_total_v1";
+  var trapsState = { entries: [] };
+
+  function loadTraps(){ try{ var raw = safeGet(TRAPS_KEY); trapsState.entries = raw ? JSON.parse(raw) : []; }catch(e){ trapsState.entries = []; } }
+  function persistTraps(){ safeSet(TRAPS_KEY, JSON.stringify(trapsState.entries)); }
+
+  var tPhoto = makePhotoCounter({
+    pickerWrap: $("tPhotoPickerWrap"), fileInput: $("tPhotoInput"), stage: $("tPhotoStage"),
+    frame: $("tPhotoFrame"), img: $("tPhotoImg"), changeBtn: $("tChangePhotoBtn"),
+    countNum: $("tCountNum"), undoBtn: $("tUndoBtn"), resetBtn: $("tResetCountBtn"), manualCount: $("tManualCount")
+  });
+  tPhoto.onChange(function(){ renderTrapResult(); });
+
+  $("trapTotalNests").value = safeGet(TRAPS_TOTAL_KEY) || "";
+  $("trapTotalNests").addEventListener("input", function(){
+    safeSet(TRAPS_TOTAL_KEY, $("trapTotalNests").value || "");
+    renderTrapResult();
+  });
+  function currentNestTotal(){
+    var v = parseInt($("trapTotalNests").value, 10);
+    return (isNaN(v) || v <= 0) ? null : v;
+  }
+  function fmtOccupancy(count, total){
+    if(!total) return count + " nidos ocupados";
+    var pct = Math.round((count/total)*100);
+    return count + " de " + total + " nidos (" + pct + "%)";
+  }
+
+  function renderTrapResult(){
+    var total = currentNestTotal();
+    var count = tPhoto.getCount();
+    $("tOccupancyOut").textContent = total ? fmtOccupancy(count, total) : (count + " ocupados (sin total definido)");
+    updateTrapsSaveEnabled();
+  }
+  function updateTrapsSaveEnabled(){
+    $("tSaveBtn").disabled = !(hasProfile() && tPhoto.hasPhoto());
+  }
+
+  function resetTrapForm(){
+    tPhoto.reset();
+    $("tNameInput").value = "";
+    renderTrapResult();
+  }
+
+  $("tSaveBtn").addEventListener("click", function(){
+    var photo = tPhoto.getPhoto();
+    if(!hasProfile() || !photo.dataUrl) return;
+    var count = tPhoto.getCount();
+    var total = currentNestTotal();
+    var entry = {
+      id: "t" + Date.now() + Math.random().toString(16).slice(2),
+      usuario: profile.name, ubicacion: profile.location, lat: profile.lat, lon: profile.lon, tamanoJardin: profile.gardenSize,
+      name: $("tNameInput").value.trim() || "Paquete de trampas nido",
+      photo: photo.dataUrl, photoW: photo.w, photoH: photo.h,
+      occupied: count, total: total,
+      occupancyPct: total ? Math.round((count/total)*100) : null,
+      savedAt: new Date().toISOString()
+    };
+    trapsState.entries.unshift(entry);
+    persistTraps();
+    renderTrapsCatalog();
+    showToast($("tSaveToast"), "Guardado — ya está en tu catálogo, más abajo.");
+    resetTrapForm();
+  });
+
+  function orderedTraps(){ return trapsState.entries.slice().reverse(); }
+
+  function renderTrapsCatalog(){
+    var list = $("tCatalogList");
+    list.innerHTML = "";
+    if(!trapsState.entries.length){ $("tEmptyState").style.display = "block"; }
+    else{
+      $("tEmptyState").style.display = "none";
+      trapsState.entries.forEach(function(entry){ list.appendChild(buildTrapCard(entry)); });
+    }
+    var n = trapsState.entries.length;
+    if(n){
+      var totalOcc = trapsState.entries.reduce(function(s,e){ return s+(e.occupied||0); },0);
+      $("tCatalogStat").textContent = n + (n===1?" trampa registrada":" trampas registradas") + " · " + totalOcc + " nidos ocupados en total";
+    } else { $("tCatalogStat").textContent = ""; }
+    renderTrapExport();
+    if(typeof refreshReminders === "function") refreshReminders();
+  }
+
+  function buildTrapCard(entry){
+    var row = document.createElement("div");
+    row.className = "entry"; row.dataset.id = entry.id;
+    var img = document.createElement("img"); img.src = entry.photo; img.alt = entry.name;
+    row.appendChild(img);
+    var meta = document.createElement("div"); meta.className = "meta";
+    var nameEl = document.createElement("div"); nameEl.className = "name"; nameEl.textContent = entry.name;
+    var subEl = document.createElement("div"); subEl.className = "sub";
+    subEl.innerHTML = "<b>" + fmtOccupancy(entry.occupied, entry.total) + "</b>";
+    var subEl2 = document.createElement("div"); subEl2.className = "sub";
+    subEl2.textContent = fmtDate(entry.savedAt) + " · registró " + (entry.usuario || "—");
+    meta.appendChild(nameEl); meta.appendChild(subEl); meta.appendChild(subEl2);
+    row.appendChild(meta);
+    row.appendChild(buildDeleteActions(function(){
+      trapsState.entries = trapsState.entries.filter(function(e){ return e.id !== entry.id; });
+      persistTraps(); renderTrapsCatalog();
+    }));
+    return row;
+  }
+
+  function renderTrapExport(){
+    var ordered = orderedTraps();
+    if(!ordered.length){ $("tExportBox").value = ""; return; }
+    $("tExportBox").value = ordered.map(function(e,i){
+      return ["T"+(i+1), fmtDate(e.savedAt), e.usuario||"—", e.name, fmtOccupancy(e.occupied, e.total)].join(" — ");
+    }).join("\n");
+  }
+  $("tCopyBtn").addEventListener("click", function(){ copyText($("tExportBox").value, $("tCopyToast")); });
+
+  function buildTrapsCsv(){
+    var ordered = orderedTraps();
+    var header = ["ref_foto","fecha","usuario","ubicacion","lat","lon","tamano_jardin","identificador_paquete","nidos_ocupados","nidos_totales","ocupacion_pct"];
+    var rows = ordered.map(function(e,i){
+      return ["T"+(i+1), fmtDate(e.savedAt), e.usuario||"", e.ubicacion||"", (e.lat!=null?e.lat:""), (e.lon!=null?e.lon:""), e.tamanoJardin||"", e.name||"",
+        e.occupied, (e.total||""), (e.occupancyPct!=null ? e.occupancyPct : "")];
+    });
+    return buildCsvGeneric(header, rows);
+  }
+  function buildTrapsPdf(){
+    var ordered = orderedTraps();
+    return buildPdfGeneric(ordered.map(function(e,i){
+      return {
+        photo: e.photo, photoW: e.photoW, photoH: e.photoH,
+        line1: "Foto T" + (i+1) + "   ·   " + fmtDate(e.savedAt) + "   ·   registró " + (e.usuario||"—"),
+        line2: e.name + "   ·   " + fmtOccupancy(e.occupied, e.total)
+      };
+    }));
+  }
+
+  $("tDownloadBtn").addEventListener("click", function(){
+    if(!trapsState.entries.length){ showToast($("tDownloadToast"), "Todavía no hay registros para descargar."); return; }
+    var csvText, pdfBytes;
+    try{ csvText = buildTrapsCsv(); pdfBytes = buildTrapsPdf(); }
+    catch(e){ showToast($("tDownloadToast"), "No se pudieron generar los archivos."); return; }
+    var base = slug(profile.name) + "_" + trapsState.entries.length + "reg";
+    showToast($("tDownloadToast"), "Descargando el CSV...");
+    saveFile("polinido_trampas_" + base + ".csv", new Blob([csvText], {type:"text/csv"})).then(function(){
+      showToast($("tDownloadToast"), "CSV listo. Ahora el PDF de fotos...");
+      return saveFile("polinido_trampas_fotos_" + base + ".pdf", new Blob([pdfBytes], {type:"application/pdf"}));
+    }).then(function(){
+      showToast($("tDownloadToast"), "Listo — mandale los dos archivos a quien arma el catálogo.");
+    }).catch(function(){
+      showToast($("tDownloadToast"), "No se pudo completar la descarga acá. Probá con el resumen de texto o el archivo .html independiente.");
+    });
+  });
+
+  /* =====================================================================
+     INIT
+     ===================================================================== */
+  buildPfSizeChips();
+  buildPlantSizeChips();
+  loadProfile();
+  loadPlants();
+  loadTraps();
+  renderProfileSummary();
+  renderGeoStatus();
+  updatePfSaveEnabled();
+  renderPlantsCatalog();
+  renderTrapsCatalog();
+  renderPlantResult();
+  renderTrapResult();
+  activateTab(hasProfile() ? "plantas" : "perfil");
+})();
+</script>
+
+
+<script>
+  if("serviceWorker" in navigator){
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("sw.js").catch(function(){ /* offline/instalable no disponible, la app sigue funcionando igual */ });
+    });
+  }
+</script>
+
+</body>
+</html>
