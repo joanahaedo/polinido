@@ -2,7 +2,7 @@
 // y funcione offline una vez visitada. Subí la versión del cache cada vez
 // que reemplaces index.html en el hosting para que los celulares tomen
 // la versión nueva.
-const CACHE_NAME = "polinido-v1";
+const CACHE_NAME = "polinido-v2";
 const APP_SHELL = [
   "./",
   "./index.html",

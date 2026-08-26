@@ -12,6 +12,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="PoliNido">
 <meta name="mobile-web-app-capable" content="yes">
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <title>PoliNido</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -246,14 +247,30 @@
     </div>
     <div>
       <h1>PoliNido</h1>
-      <p>Floración y nidificación de abejas urbanas — sin cuenta ni login.</p>
+      <p>Floración y nidificación de abejas urbanas — registro colaborativo.</p>
     </div>
   </header>
+
+  <!-- ================= INGRESO ================= -->
+  <section class="card flow" id="authGateCard" style="margin-top:22px;">
+    <div class="step">
+      <div class="step-label"><span class="step-num">✉</span>Ingresá con tu mail</div>
+      <p class="hint">Te mandamos un link para entrar, sin contraseña que inventar ni recordar. Con tu cuenta podés ver el catálogo de toda la comunidad y que otras personas vean el tuyo.</p>
+      <input type="text" id="authEmail" placeholder="tu@mail.com" inputmode="email" autocomplete="email">
+      <div class="save-row" style="padding:14px 0 0; border-top:none;">
+        <button type="button" class="btn btn-primary btn-block" id="authSendBtn">Enviarme el link para entrar</button>
+        <p class="toast" id="authToast" role="status"></p>
+      </div>
+    </div>
+  </section>
+
+  <div id="appMain" style="display:none;">
 
   <nav class="tabbar" role="tablist" aria-label="Secciones">
     <button type="button" class="tab" role="tab" id="tabBtnPerfil" data-tab="perfil" aria-selected="true">Mi jardín</button>
     <button type="button" class="tab" role="tab" id="tabBtnPlantas" data-tab="plantas" aria-selected="false">Plantas<span class="tab-dot" id="tabDotPlantas" aria-hidden="true"></span></button>
     <button type="button" class="tab" role="tab" id="tabBtnTrampas" data-tab="trampas" aria-selected="false">Trampas nido<span class="tab-dot" id="tabDotTrampas" aria-hidden="true"></span></button>
+    <button type="button" class="tab" role="tab" id="tabBtnComunidad" data-tab="comunidad" aria-selected="false">Comunidad</button>
   </nav>
 
   <!-- ================= PERFIL ================= -->
@@ -267,13 +284,14 @@
           <div class="s" id="profileSummarySub"></div>
         </div>
         <button type="button" class="btn btn-ghost" id="profileEditBtn">Editar</button>
+        <button type="button" class="btn btn-ghost" id="logoutBtn">Cerrar sesión</button>
       </div>
     </section>
 
     <section class="card flow" id="profileFormCard">
       <div class="step">
         <div class="step-label"><span class="step-num">1</span>Tu nombre</div>
-        <p class="hint">Así identificamos quién registró cada planta o trampa. No hace falta que sea tu nombre real, ni crear ninguna cuenta.</p>
+        <p class="hint">Así te van a ver los demás en el catálogo de la comunidad. No hace falta que sea tu nombre real.</p>
         <input type="text" id="pfName" placeholder="ej: Joana">
       </div>
       <div class="step">
@@ -390,9 +408,9 @@
     </section>
 
     <section aria-labelledby="plantsExportHeading">
-      <div class="section-head"><h2 id="plantsExportHeading">Juntar los datos del grupo</h2></div>
+      <div class="section-head"><h2 id="plantsExportHeading">Descargar una copia</h2></div>
       <div class="card" style="padding:18px 20px;">
-        <p class="hint" style="margin-bottom:12px;">Descargá los dos archivos y envíaselos a quien esté armando el catálogo: un CSV con los datos y un PDF con las fotos en el mismo orden (misma referencia F1, F2... en los dos).</p>
+        <p class="hint" style="margin-bottom:12px;">Tus registros ya quedan guardados automáticamente y visibles en la pestaña "Comunidad". Esto es solo por si querés una copia propia: un CSV con los datos (incluye el link a cada foto) y un PDF con las fotos.</p>
         <div class="export-actions" style="margin-top:0; margin-bottom:14px;">
           <button type="button" class="btn btn-primary" id="pDownloadBtn">Descargar CSV + PDF de fotos</button>
           <span class="toast" id="pDownloadToast" role="status" style="margin-top:0;"></span>
@@ -476,9 +494,9 @@
     </section>
 
     <section aria-labelledby="trapsExportHeading">
-      <div class="section-head"><h2 id="trapsExportHeading">Juntar los datos del grupo</h2></div>
+      <div class="section-head"><h2 id="trapsExportHeading">Descargar una copia</h2></div>
       <div class="card" style="padding:18px 20px;">
-        <p class="hint" style="margin-bottom:12px;">Igual que con las plantas: descargá el CSV con los datos y el PDF con las fotos, mismas referencias (T1, T2...) en los dos.</p>
+        <p class="hint" style="margin-bottom:12px;">Igual que con las plantas: tus registros ya quedan guardados y visibles en "Comunidad". Esto es solo por si querés una copia propia en CSV + PDF.</p>
         <div class="export-actions" style="margin-top:0; margin-bottom:14px;">
           <button type="button" class="btn btn-primary" id="tDownloadBtn">Descargar CSV + PDF de fotos</button>
           <span class="toast" id="tDownloadToast" role="status" style="margin-top:0;"></span>
@@ -490,7 +508,23 @@
     </section>
   </div>
 
-  <footer class="note">Prototipo de PoliNido · todo pasa en tu navegador, no se manda nada a ningún servidor.</footer>
+  <!-- ================= COMUNIDAD ================= -->
+  <div class="tabpanel" id="panelComunidad">
+    <section aria-labelledby="communityPlantsHeading">
+      <div class="section-head"><h2 id="communityPlantsHeading">Plantas de toda la comunidad</h2><span class="stat" id="cpCatalogStat"></span></div>
+      <div class="card"><div class="catalog" id="cpCatalogList"></div><p class="empty" id="cpEmptyState">Todavía no hay plantas registradas.</p></div>
+      <div class="export-actions" style="margin-top:12px;"><button type="button" class="btn" id="cpLoadMoreBtn" style="display:none;">Cargar más</button></div>
+    </section>
+    <section aria-labelledby="communityTrapsHeading">
+      <div class="section-head"><h2 id="communityTrapsHeading">Trampas nido de toda la comunidad</h2><span class="stat" id="ctCatalogStat"></span></div>
+      <div class="card"><div class="catalog" id="ctCatalogList"></div><p class="empty" id="ctEmptyState">Todavía no hay trampas registradas.</p></div>
+      <div class="export-actions" style="margin-top:12px;"><button type="button" class="btn" id="ctLoadMoreBtn" style="display:none;">Cargar más</button></div>
+    </section>
+  </div>
+
+  </div><!-- /appMain -->
+
+  <footer class="note">Prototipo de PoliNido · registro colaborativo de floración y nidificación de abejas urbanas.</footer>
 </div>
 
 <script>
@@ -629,7 +663,7 @@
       push("\nendstream");
       endObj();
 
-      var imgBytes = dataUrlToBytes(pg.photo);
+      var imgBytes = pg.photoBytes || dataUrlToBytes(pg.photo);
       beginObj(imgNum);
       push("<< /Type /XObject /Subtype /Image /Width " + imgW + " /Height " + imgH + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + imgBytes.length + " >>\nstream\n");
       push(imgBytes);
@@ -798,15 +832,109 @@
   }
 
   /* =====================================================================
+     SUPABASE (login por mail + base de datos compartida)
+     ===================================================================== */
+  var SUPABASE_URL = "https://nazuydkdbehnbufzlmkb.supabase.co";
+  var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5henV5ZGtkYmVobmJ1ZnpsbWtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3NDc4MTgsImV4cCI6MjEwMzMyMzgxOH0.KNf7cJ_2uHHVKGZcg3ieVShhTUl5UI3AMKX9xUYqNwU";
+  var sb = (window.supabase && typeof window.supabase.createClient === "function")
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
+  var currentUser = null;
+  var appBooted = false;
+
+  function uploadPhoto(bucket, dataUrl, pathHint){
+    var bytes = dataUrlToBytes(dataUrl);
+    var blob = new Blob([bytes], {type:"image/jpeg"});
+    var path = currentUser.id + "/" + pathHint + "_" + Date.now() + "_" + Math.random().toString(16).slice(2) + ".jpg";
+    return sb.storage.from(bucket).upload(path, blob, {contentType:"image/jpeg", upsert:false}).then(function(res){
+      if(res.error) throw res.error;
+      var pub = sb.storage.from(bucket).getPublicUrl(path);
+      return pub.data.publicUrl;
+    });
+  }
+
+  function fetchPhotoBytes(url){
+    return fetch(url).then(function(r){
+      if(!r.ok) throw new Error("no se pudo descargar una de las fotos");
+      return r.arrayBuffer();
+    }).then(function(buf){ return new Uint8Array(buf); });
+  }
+
+  function showAuthGate(show){
+    $("authGateCard").style.display = show ? "block" : "none";
+    $("appMain").style.display = show ? "none" : "block";
+  }
+
+  $("authSendBtn").addEventListener("click", function(){
+    var email = $("authEmail").value.trim();
+    if(!email || email.indexOf("@") === -1){ showToast($("authToast"), "Escribí un mail válido."); return; }
+    if(!sb){ showToast($("authToast"), "No se pudo conectar. Recargá la página e intentá de nuevo."); return; }
+    $("authSendBtn").disabled = true;
+    var redirectTo = window.location.origin + window.location.pathname;
+    sb.auth.signInWithOtp({ email: email, options: { emailRedirectTo: redirectTo } }).then(function(res){
+      $("authSendBtn").disabled = false;
+      if(res.error){ showToast($("authToast"), "No se pudo enviar el link: " + res.error.message); return; }
+      showToast($("authToast"), "¡Listo! Revisá tu mail (" + email + ") y tocá el link para entrar.");
+    }).catch(function(){
+      $("authSendBtn").disabled = false;
+      showToast($("authToast"), "No se pudo enviar el link. Revisá tu conexión.");
+    });
+  });
+
+  $("logoutBtn").addEventListener("click", function(){
+    if(!sb) return;
+    sb.auth.signOut().then(function(){
+      currentUser = null;
+      appBooted = false;
+      showAuthGate(true);
+    });
+  });
+
+  function afterLogin(){
+    if(appBooted) return;
+    appBooted = true;
+    Promise.all([loadProfileFromDb(), loadPlantsFromDb(), loadTrapsFromDb()]).then(function(){
+      renderProfileSummary();
+      renderGeoStatus();
+      updatePfSaveEnabled();
+      renderPlantsCatalog();
+      renderTrapsCatalog();
+      renderPlantResult();
+      renderTrapResult();
+      activateTab(hasProfile() ? "plantas" : "perfil");
+    }).catch(function(err){
+      appBooted = false;
+      showToast($("authToast"), "No se pudieron cargar tus datos: " + (err && err.message ? err.message : "revisá tu conexión."));
+    });
+  }
+
+  if(sb){
+    sb.auth.onAuthStateChange(function(event, session){
+      currentUser = session ? session.user : null;
+      if(currentUser){ showAuthGate(false); afterLogin(); }
+      else { showAuthGate(true); appBooted = false; }
+    });
+  } else {
+    showAuthGate(true);
+    showToast($("authToast"), "No se pudo inicializar la conexión. Recargá la página.");
+  }
+
+  /* =====================================================================
      TABS
      ===================================================================== */
   var tabButtons = Array.prototype.slice.call(document.querySelectorAll(".tab"));
-  var panels = { perfil: $("panelPerfil"), plantas: $("panelPlantas"), trampas: $("panelTrampas") };
+  var panels = { perfil: $("panelPerfil"), plantas: $("panelPlantas"), trampas: $("panelTrampas"), comunidad: $("panelComunidad") };
+  var communityLoaded = false;
 
   function activateTab(name){
     tabButtons.forEach(function(b){ b.setAttribute("aria-selected", b.dataset.tab === name ? "true" : "false"); });
     Object.keys(panels).forEach(function(k){ panels[k].classList.toggle("active", k === name); });
     refreshGates();
+    if(name === "comunidad" && !communityLoaded && sb){
+      communityLoaded = true;
+      loadCommunityPlants(false).catch(function(){});
+      loadCommunityTraps(false).catch(function(){});
+    }
   }
   tabButtons.forEach(function(b){ b.addEventListener("click", function(){ activateTab(b.dataset.tab); }); });
   Array.prototype.slice.call(document.querySelectorAll("[data-goto]")).forEach(function(b){
@@ -816,7 +944,6 @@
   /* =====================================================================
      PERFIL
      ===================================================================== */
-  var PROFILE_KEY = "florecer_perfil_v1";
   var GARDEN_SIZES = [
     {id:"chico", name:"Chico"},
     {id:"mediano", name:"Mediano"},
@@ -825,13 +952,18 @@
 
   var profile = { name:"", location:"", gardenSize:"", photo:null, photoW:0, photoH:0, lat:null, lon:null, createdAt:null };
 
-  function loadProfile(){
-    try{
-      var raw = safeGet(PROFILE_KEY);
-      if(raw) profile = JSON.parse(raw);
-    }catch(e){}
+  function loadProfileFromDb(){
+    return sb.from("profiles").select("*").eq("id", currentUser.id).maybeSingle().then(function(res){
+      if(res.error) throw res.error;
+      var row = res.data;
+      profile = row ? {
+        name: row.display_name || "", location: row.location_text || "", gardenSize: row.garden_size || "",
+        photo: row.garden_photo_url || null, photoW: 0, photoH: 0,
+        lat: row.lat != null ? row.lat : null, lon: row.lon != null ? row.lon : null,
+        createdAt: row.created_at || null
+      } : { name:"", location:"", gardenSize:"", photo:null, photoW:0, photoH:0, lat:null, lon:null, createdAt:null };
+    });
   }
-  function persistProfile(){ safeSet(PROFILE_KEY, JSON.stringify(profile)); }
   function hasProfile(){ return !!(profile && profile.name && profile.name.trim()); }
 
   var pfPhoto = makePhotoCounter({
@@ -863,9 +995,13 @@
     navigator.geolocation.getCurrentPosition(function(pos){
       profile.lat = pos.coords.latitude;
       profile.lon = pos.coords.longitude;
-      persistProfile();
       renderGeoStatus();
       showToast($("pfGeoToast"), "¡Listo! Ubicación guardada.");
+      if(hasProfile() && currentUser && sb){
+        sb.from("profiles").update({lat: profile.lat, lon: profile.lon}).eq("id", currentUser.id).then(function(res){
+          if(res.error){ showToast($("pfGeoToast"), "Se guardó en la app pero no se pudo sincronizar todavía."); }
+        });
+      }
     }, function(err){
       var msg = "No se pudo obtener tu ubicación.";
       if(err && err.code === 1) msg = "Le dijiste que no al permiso de ubicación — podés escribir el barrio a mano arriba.";
@@ -925,19 +1061,37 @@
   $("pfName").addEventListener("input", updatePfSaveEnabled);
 
   $("pfSaveBtn").addEventListener("click", function(){
-    if(!$("pfName").value.trim()) return;
-    profile.name = $("pfName").value.trim();
-    profile.location = $("pfLocation").value.trim();
+    var name = $("pfName").value.trim();
+    if(!name || !currentUser || !sb) return;
+    $("pfSaveBtn").disabled = true;
+    var location = $("pfLocation").value.trim();
     var photo = pfPhoto.getPhoto();
-    if(photo.dataUrl){ profile.photo = photo.dataUrl; profile.photoW = photo.w; profile.photoH = photo.h; }
-    if(!profile.createdAt){ profile.createdAt = new Date().toISOString(); }
-    persistProfile();
-    renderProfileSummary();
-    renderGeoStatus();
-    showToast($("pfToast"), "Perfil guardado.");
-    refreshGates();
-    renderPlantsCatalog();
-    renderTrapsCatalog();
+    var isNewPhoto = photo.dataUrl && photo.dataUrl.indexOf("data:") === 0;
+    var uploadStep = isNewPhoto ? uploadPhoto("garden-photos", photo.dataUrl, "garden") : Promise.resolve(profile.photo || null);
+
+    uploadStep.then(function(photoUrl){
+      var row = {
+        id: currentUser.id, display_name: name, location_text: location,
+        lat: profile.lat, lon: profile.lon, garden_size: profile.gardenSize || null,
+        garden_photo_url: photoUrl
+      };
+      return sb.from("profiles").upsert(row).then(function(res){
+        if(res.error) throw res.error;
+        profile.name = name; profile.location = location; profile.photo = photoUrl;
+        if(!profile.createdAt) profile.createdAt = new Date().toISOString();
+      });
+    }).then(function(){
+      renderProfileSummary();
+      renderGeoStatus();
+      showToast($("pfToast"), "Perfil guardado.");
+      refreshGates();
+      renderPlantsCatalog();
+      renderTrapsCatalog();
+    }).catch(function(err){
+      showToast($("pfToast"), "No se pudo guardar: " + (err && err.message ? err.message : "revisá tu conexión."));
+    }).then(function(){
+      $("pfSaveBtn").disabled = false;
+    });
   });
 
   var REMINDER_DAYS = 30;
@@ -977,7 +1131,6 @@
   /* =====================================================================
      PLANTAS
      ===================================================================== */
-  var PLANTS_KEY = "florecer_plantas_v1";
   var SIZE_CATEGORIES = [
     { id:"maceta-chica", name:"Maceta chica", area:0.03 },
     { id:"maceta-grande", name:"Maceta grande / cantero chico", area:0.15 },
@@ -989,8 +1142,19 @@
   ];
   var plantsState = { entries: [], selectedSize: null, customArea: null };
 
-  function loadPlants(){ try{ var raw = safeGet(PLANTS_KEY); plantsState.entries = raw ? JSON.parse(raw) : []; }catch(e){ plantsState.entries = []; } }
-  function persistPlants(){ safeSet(PLANTS_KEY, JSON.stringify(plantsState.entries)); }
+  function rowToPlantEntry(row){
+    return {
+      id: row.id, name: row.name, photo: row.photo_url, photoW: row.photo_w, photoH: row.photo_h,
+      count: row.flower_count, sizeCategory: row.size_category, area: row.area_m2, density: row.density,
+      savedAt: row.created_at
+    };
+  }
+  function loadPlantsFromDb(){
+    return sb.from("plants").select("*").eq("user_id", currentUser.id).order("created_at", {ascending:false}).then(function(res){
+      if(res.error) throw res.error;
+      plantsState.entries = (res.data || []).map(rowToPlantEntry);
+    });
+  }
 
   var pPhoto = makePhotoCounter({
     pickerWrap: $("pPhotoPickerWrap"), fileInput: $("pPhotoInput"), stage: $("pPhotoStage"),
@@ -1070,20 +1234,29 @@
     var area = currentPlantArea();
     var count = pPhoto.getCount();
     var photo = pPhoto.getPhoto();
-    if(!hasProfile() || !photo.dataUrl || !$("pNameInput").value.trim() || area == null) return;
-    var entry = {
-      id: "p" + Date.now() + Math.random().toString(16).slice(2),
-      usuario: profile.name, ubicacion: profile.location, lat: profile.lat, lon: profile.lon, tamanoJardin: profile.gardenSize,
-      name: $("pNameInput").value.trim(),
-      photo: photo.dataUrl, photoW: photo.w, photoH: photo.h,
-      count: count, sizeCategory: plantsState.selectedSize, area: area,
-      density: area > 0 ? count/area : null, savedAt: new Date().toISOString()
-    };
-    plantsState.entries.unshift(entry);
-    persistPlants();
-    renderPlantsCatalog();
-    showToast($("pSaveToast"), "Guardado — ya está en tu catálogo, más abajo.");
-    resetPlantForm();
+    var name = $("pNameInput").value.trim();
+    if(!hasProfile() || !currentUser || !sb || !photo.dataUrl || !name || area == null) return;
+    $("pSaveBtn").disabled = true;
+    uploadPhoto("plant-photos", photo.dataUrl, "plant").then(function(url){
+      var row = {
+        user_id: currentUser.id, name: name, photo_url: url, photo_w: photo.w, photo_h: photo.h,
+        flower_count: count, size_category: plantsState.selectedSize, area_m2: area,
+        density: area > 0 ? count/area : null
+      };
+      return sb.from("plants").insert(row);
+    }).then(function(res){
+      if(res.error) throw res.error;
+      return loadPlantsFromDb();
+    }).then(function(){
+      renderPlantsCatalog();
+      showToast($("pSaveToast"), "Guardado — ya está en tu catálogo, más abajo.");
+      resetPlantForm();
+    }).catch(function(err){
+      showToast($("pSaveToast"), "No se pudo guardar: " + (err && err.message ? err.message : "revisá tu conexión."));
+    }).then(function(){
+      $("pSaveBtn").disabled = false;
+      updatePlantsSaveEnabled();
+    });
   });
 
   function orderedPlants(){ return plantsState.entries.slice().reverse(); }
@@ -1115,12 +1288,14 @@
     var subEl = document.createElement("div"); subEl.className = "sub";
     subEl.innerHTML = entry.count + " flores · " + fmtArea(entry.area) + " · <b>" + fmtDensity(entry.count, entry.area) + "</b>";
     var subEl2 = document.createElement("div"); subEl2.className = "sub";
-    subEl2.textContent = (plantCategoryName(entry.sizeCategory) || "área personalizada") + " · " + fmtDate(entry.savedAt) + " · registró " + (entry.usuario || "—");
+    subEl2.textContent = (plantCategoryName(entry.sizeCategory) || "área personalizada") + " · " + fmtDate(entry.savedAt) + " · registró " + (profile.name || "—");
     meta.appendChild(nameEl); meta.appendChild(subEl); meta.appendChild(subEl2);
     row.appendChild(meta);
     row.appendChild(buildDeleteActions(function(){
-      plantsState.entries = plantsState.entries.filter(function(e){ return e.id !== entry.id; });
-      persistPlants(); renderPlantsCatalog();
+      sb.from("plants").delete().eq("id", entry.id).then(function(res){
+        if(res.error){ showToast($("pSaveToast"), "No se pudo eliminar: " + res.error.message); return; }
+        return loadPlantsFromDb().then(renderPlantsCatalog);
+      });
     }));
     return row;
   }
@@ -1148,57 +1323,71 @@
     var ordered = orderedPlants();
     if(!ordered.length){ $("pExportBox").value = ""; return; }
     $("pExportBox").value = ordered.map(function(e,i){
-      return ["F"+(i+1), fmtDate(e.savedAt), e.usuario||"—", e.name, e.count+" flores", fmtArea(e.area), fmtDensity(e.count,e.area)].join(" — ");
+      return ["F"+(i+1), fmtDate(e.savedAt), profile.name||"—", e.name, e.count+" flores", fmtArea(e.area), fmtDensity(e.count,e.area)].join(" — ");
     }).join("\n");
   }
   $("pCopyBtn").addEventListener("click", function(){ copyText($("pExportBox").value, $("pCopyToast")); });
 
   function buildPlantsCsv(){
     var ordered = orderedPlants();
-    var header = ["ref_foto","fecha","usuario","ubicacion","lat","lon","tamano_jardin","nombre_planta","flores","categoria_tamano","area_m2","densidad_flores_m2"];
+    var header = ["ref_foto","fecha","usuario","ubicacion","lat","lon","tamano_jardin","nombre_planta","flores","categoria_tamano","area_m2","densidad_flores_m2","url_foto"];
     var rows = ordered.map(function(e,i){
-      return ["F"+(i+1), fmtDate(e.savedAt), e.usuario||"", e.ubicacion||"", (e.lat!=null?e.lat:""), (e.lon!=null?e.lon:""), e.tamanoJardin||"", e.name||"", e.count,
-        plantCategoryName(e.sizeCategory) || "área personalizada", e.area, (e.area ? (e.count/e.area).toFixed(2) : "")];
+      return ["F"+(i+1), fmtDate(e.savedAt), profile.name||"", profile.location||"", (profile.lat!=null?profile.lat:""), (profile.lon!=null?profile.lon:""), profile.gardenSize||"", e.name||"", e.count,
+        plantCategoryName(e.sizeCategory) || "área personalizada", e.area, (e.area ? (e.count/e.area).toFixed(2) : ""), e.photo||""];
     });
     return buildCsvGeneric(header, rows);
   }
   function buildPlantsPdf(){
     var ordered = orderedPlants();
-    return buildPdfGeneric(ordered.map(function(e,i){
-      return {
-        photo: e.photo, photoW: e.photoW, photoH: e.photoH,
-        line1: "Foto F" + (i+1) + "   ·   " + fmtDate(e.savedAt) + "   ·   registró " + (e.usuario||"—"),
-        line2: e.name + "   ·   " + e.count + " flores   ·   " + noSup2(fmtArea(e.area)) + "   ·   " + noSup2(fmtDensity(e.count, e.area))
-      };
-    }));
+    return Promise.all(ordered.map(function(e){ return fetchPhotoBytes(e.photo); })).then(function(bytesList){
+      var pages = ordered.map(function(e,i){
+        return {
+          photoBytes: bytesList[i], photoW: e.photoW, photoH: e.photoH,
+          line1: "Foto F" + (i+1) + "   ·   " + fmtDate(e.savedAt) + "   ·   registró " + (profile.name||"—"),
+          line2: e.name + "   ·   " + e.count + " flores   ·   " + noSup2(fmtArea(e.area)) + "   ·   " + noSup2(fmtDensity(e.count, e.area))
+        };
+      });
+      return buildPdfGeneric(pages);
+    });
   }
 
   $("pDownloadBtn").addEventListener("click", function(){
     if(!plantsState.entries.length){ showToast($("pDownloadToast"), "Todavía no hay registros para descargar."); return; }
-    var csvText, pdfBytes;
-    try{ csvText = buildPlantsCsv(); pdfBytes = buildPlantsPdf(); }
-    catch(e){ showToast($("pDownloadToast"), "No se pudieron generar los archivos."); return; }
+    var csvText;
+    try{ csvText = buildPlantsCsv(); }
+    catch(e){ showToast($("pDownloadToast"), "No se pudo generar el CSV."); return; }
     var base = slug(profile.name) + "_" + plantsState.entries.length + "reg";
     showToast($("pDownloadToast"), "Descargando el CSV...");
     saveFile("polinido_plantas_" + base + ".csv", new Blob([csvText], {type:"text/csv"})).then(function(){
-      showToast($("pDownloadToast"), "CSV listo. Ahora el PDF de fotos...");
+      showToast($("pDownloadToast"), "CSV listo. Preparando el PDF de fotos...");
+      return buildPlantsPdf();
+    }).then(function(pdfBytes){
       return saveFile("polinido_plantas_fotos_" + base + ".pdf", new Blob([pdfBytes], {type:"application/pdf"}));
     }).then(function(){
-      showToast($("pDownloadToast"), "Listo — mandale los dos archivos a quien arma el catálogo.");
-    }).catch(function(){
-      showToast($("pDownloadToast"), "No se pudo completar la descarga acá. Probá con el resumen de texto o el archivo .html independiente.");
+      showToast($("pDownloadToast"), "Listo.");
+    }).catch(function(err){
+      showToast($("pDownloadToast"), "No se pudo completar la descarga: " + (err && err.message ? err.message : "revisá tu conexión."));
     });
   });
 
   /* =====================================================================
      TRAMPAS NIDO
      ===================================================================== */
-  var TRAPS_KEY = "florecer_trampas_v1";
   var TRAPS_TOTAL_KEY = "florecer_trampas_total_v1";
   var trapsState = { entries: [] };
 
-  function loadTraps(){ try{ var raw = safeGet(TRAPS_KEY); trapsState.entries = raw ? JSON.parse(raw) : []; }catch(e){ trapsState.entries = []; } }
-  function persistTraps(){ safeSet(TRAPS_KEY, JSON.stringify(trapsState.entries)); }
+  function rowToTrapEntry(row){
+    return {
+      id: row.id, name: row.name, photo: row.photo_url, photoW: row.photo_w, photoH: row.photo_h,
+      occupied: row.occupied, total: row.total_nests, occupancyPct: row.occupancy_pct, savedAt: row.created_at
+    };
+  }
+  function loadTrapsFromDb(){
+    return sb.from("traps").select("*").eq("user_id", currentUser.id).order("created_at", {ascending:false}).then(function(res){
+      if(res.error) throw res.error;
+      trapsState.entries = (res.data || []).map(rowToTrapEntry);
+    });
+  }
 
   var tPhoto = makePhotoCounter({
     pickerWrap: $("tPhotoPickerWrap"), fileInput: $("tPhotoInput"), stage: $("tPhotoStage"),
@@ -1240,23 +1429,31 @@
 
   $("tSaveBtn").addEventListener("click", function(){
     var photo = tPhoto.getPhoto();
-    if(!hasProfile() || !photo.dataUrl) return;
+    if(!hasProfile() || !currentUser || !sb || !photo.dataUrl) return;
+    $("tSaveBtn").disabled = true;
     var count = tPhoto.getCount();
     var total = currentNestTotal();
-    var entry = {
-      id: "t" + Date.now() + Math.random().toString(16).slice(2),
-      usuario: profile.name, ubicacion: profile.location, lat: profile.lat, lon: profile.lon, tamanoJardin: profile.gardenSize,
-      name: $("tNameInput").value.trim() || "Paquete de trampas nido",
-      photo: photo.dataUrl, photoW: photo.w, photoH: photo.h,
-      occupied: count, total: total,
-      occupancyPct: total ? Math.round((count/total)*100) : null,
-      savedAt: new Date().toISOString()
-    };
-    trapsState.entries.unshift(entry);
-    persistTraps();
-    renderTrapsCatalog();
-    showToast($("tSaveToast"), "Guardado — ya está en tu catálogo, más abajo.");
-    resetTrapForm();
+    uploadPhoto("trap-photos", photo.dataUrl, "trap").then(function(url){
+      var row = {
+        user_id: currentUser.id, name: $("tNameInput").value.trim() || "Paquete de trampas nido",
+        photo_url: url, photo_w: photo.w, photo_h: photo.h,
+        occupied: count, total_nests: total,
+        occupancy_pct: total ? Math.round((count/total)*100) : null
+      };
+      return sb.from("traps").insert(row);
+    }).then(function(res){
+      if(res.error) throw res.error;
+      return loadTrapsFromDb();
+    }).then(function(){
+      renderTrapsCatalog();
+      showToast($("tSaveToast"), "Guardado — ya está en tu catálogo, más abajo.");
+      resetTrapForm();
+    }).catch(function(err){
+      showToast($("tSaveToast"), "No se pudo guardar: " + (err && err.message ? err.message : "revisá tu conexión."));
+    }).then(function(){
+      $("tSaveBtn").disabled = false;
+      updateTrapsSaveEnabled();
+    });
   });
 
   function orderedTraps(){ return trapsState.entries.slice().reverse(); }
@@ -1288,12 +1485,14 @@
     var subEl = document.createElement("div"); subEl.className = "sub";
     subEl.innerHTML = "<b>" + fmtOccupancy(entry.occupied, entry.total) + "</b>";
     var subEl2 = document.createElement("div"); subEl2.className = "sub";
-    subEl2.textContent = fmtDate(entry.savedAt) + " · registró " + (entry.usuario || "—");
+    subEl2.textContent = fmtDate(entry.savedAt) + " · registró " + (profile.name || "—");
     meta.appendChild(nameEl); meta.appendChild(subEl); meta.appendChild(subEl2);
     row.appendChild(meta);
     row.appendChild(buildDeleteActions(function(){
-      trapsState.entries = trapsState.entries.filter(function(e){ return e.id !== entry.id; });
-      persistTraps(); renderTrapsCatalog();
+      sb.from("traps").delete().eq("id", entry.id).then(function(res){
+        if(res.error){ showToast($("tSaveToast"), "No se pudo eliminar: " + res.error.message); return; }
+        return loadTrapsFromDb().then(renderTrapsCatalog);
+      });
     }));
     return row;
   }
@@ -1302,64 +1501,129 @@
     var ordered = orderedTraps();
     if(!ordered.length){ $("tExportBox").value = ""; return; }
     $("tExportBox").value = ordered.map(function(e,i){
-      return ["T"+(i+1), fmtDate(e.savedAt), e.usuario||"—", e.name, fmtOccupancy(e.occupied, e.total)].join(" — ");
+      return ["T"+(i+1), fmtDate(e.savedAt), profile.name||"—", e.name, fmtOccupancy(e.occupied, e.total)].join(" — ");
     }).join("\n");
   }
   $("tCopyBtn").addEventListener("click", function(){ copyText($("tExportBox").value, $("tCopyToast")); });
 
   function buildTrapsCsv(){
     var ordered = orderedTraps();
-    var header = ["ref_foto","fecha","usuario","ubicacion","lat","lon","tamano_jardin","identificador_paquete","nidos_ocupados","nidos_totales","ocupacion_pct"];
+    var header = ["ref_foto","fecha","usuario","ubicacion","lat","lon","tamano_jardin","identificador_paquete","nidos_ocupados","nidos_totales","ocupacion_pct","url_foto"];
     var rows = ordered.map(function(e,i){
-      return ["T"+(i+1), fmtDate(e.savedAt), e.usuario||"", e.ubicacion||"", (e.lat!=null?e.lat:""), (e.lon!=null?e.lon:""), e.tamanoJardin||"", e.name||"",
-        e.occupied, (e.total||""), (e.occupancyPct!=null ? e.occupancyPct : "")];
+      return ["T"+(i+1), fmtDate(e.savedAt), profile.name||"", profile.location||"", (profile.lat!=null?profile.lat:""), (profile.lon!=null?profile.lon:""), profile.gardenSize||"", e.name||"",
+        e.occupied, (e.total||""), (e.occupancyPct!=null ? e.occupancyPct : ""), e.photo||""];
     });
     return buildCsvGeneric(header, rows);
   }
   function buildTrapsPdf(){
     var ordered = orderedTraps();
-    return buildPdfGeneric(ordered.map(function(e,i){
-      return {
-        photo: e.photo, photoW: e.photoW, photoH: e.photoH,
-        line1: "Foto T" + (i+1) + "   ·   " + fmtDate(e.savedAt) + "   ·   registró " + (e.usuario||"—"),
-        line2: e.name + "   ·   " + fmtOccupancy(e.occupied, e.total)
-      };
-    }));
+    return Promise.all(ordered.map(function(e){ return fetchPhotoBytes(e.photo); })).then(function(bytesList){
+      var pages = ordered.map(function(e,i){
+        return {
+          photoBytes: bytesList[i], photoW: e.photoW, photoH: e.photoH,
+          line1: "Foto T" + (i+1) + "   ·   " + fmtDate(e.savedAt) + "   ·   registró " + (profile.name||"—"),
+          line2: e.name + "   ·   " + fmtOccupancy(e.occupied, e.total)
+        };
+      });
+      return buildPdfGeneric(pages);
+    });
   }
 
   $("tDownloadBtn").addEventListener("click", function(){
     if(!trapsState.entries.length){ showToast($("tDownloadToast"), "Todavía no hay registros para descargar."); return; }
-    var csvText, pdfBytes;
-    try{ csvText = buildTrapsCsv(); pdfBytes = buildTrapsPdf(); }
-    catch(e){ showToast($("tDownloadToast"), "No se pudieron generar los archivos."); return; }
+    var csvText;
+    try{ csvText = buildTrapsCsv(); }
+    catch(e){ showToast($("tDownloadToast"), "No se pudo generar el CSV."); return; }
     var base = slug(profile.name) + "_" + trapsState.entries.length + "reg";
     showToast($("tDownloadToast"), "Descargando el CSV...");
     saveFile("polinido_trampas_" + base + ".csv", new Blob([csvText], {type:"text/csv"})).then(function(){
-      showToast($("tDownloadToast"), "CSV listo. Ahora el PDF de fotos...");
+      showToast($("tDownloadToast"), "CSV listo. Preparando el PDF de fotos...");
+      return buildTrapsPdf();
+    }).then(function(pdfBytes){
       return saveFile("polinido_trampas_fotos_" + base + ".pdf", new Blob([pdfBytes], {type:"application/pdf"}));
     }).then(function(){
-      showToast($("tDownloadToast"), "Listo — mandale los dos archivos a quien arma el catálogo.");
-    }).catch(function(){
-      showToast($("tDownloadToast"), "No se pudo completar la descarga acá. Probá con el resumen de texto o el archivo .html independiente.");
+      showToast($("tDownloadToast"), "Listo.");
+    }).catch(function(err){
+      showToast($("tDownloadToast"), "No se pudo completar la descarga: " + (err && err.message ? err.message : "revisá tu conexión."));
     });
   });
+
+  /* =====================================================================
+     COMUNIDAD (catálogo de todos los usuarios)
+     ===================================================================== */
+  var COMMUNITY_PAGE_SIZE = 30;
+  var communityPlantsOffset = 0, communityTrapsOffset = 0;
+
+  function buildCommunityCard(row, kind){
+    var wrap = document.createElement("div");
+    wrap.className = "entry";
+    var img = document.createElement("img"); img.src = row.photo_url; img.alt = row.name || "";
+    wrap.appendChild(img);
+    var meta = document.createElement("div"); meta.className = "meta";
+    var nameEl = document.createElement("div"); nameEl.className = "name"; nameEl.textContent = row.name || "";
+    var subEl = document.createElement("div"); subEl.className = "sub";
+    if(kind === "plant"){
+      subEl.innerHTML = row.flower_count + " flores · " + fmtArea(row.area_m2) + " · <b>" + fmtDensity(row.flower_count, row.area_m2) + "</b>";
+    } else {
+      subEl.innerHTML = "<b>" + fmtOccupancy(row.occupied, row.total_nests) + "</b>";
+    }
+    var subEl2 = document.createElement("div"); subEl2.className = "sub";
+    var ownerName = (row.profiles && row.profiles.display_name) || "—";
+    var ownerLoc = (row.profiles && row.profiles.location_text) ? (" · " + row.profiles.location_text) : "";
+    subEl2.textContent = fmtDate(row.created_at) + " · registró " + ownerName + ownerLoc;
+    meta.appendChild(nameEl); meta.appendChild(subEl); meta.appendChild(subEl2);
+    wrap.appendChild(meta);
+    return wrap;
+  }
+
+  function loadCommunityPlants(append){
+    if(!append) communityPlantsOffset = 0;
+    return sb.from("plants").select("*, profiles(display_name, location_text)")
+      .order("created_at", {ascending:false})
+      .range(communityPlantsOffset, communityPlantsOffset + COMMUNITY_PAGE_SIZE - 1)
+      .then(function(res){
+        if(res.error) throw res.error;
+        var rows = res.data || [];
+        communityPlantsOffset += rows.length;
+        var list = $("cpCatalogList");
+        if(!append) list.innerHTML = "";
+        rows.forEach(function(row){ list.appendChild(buildCommunityCard(row, "plant")); });
+        var shown = list.children.length;
+        $("cpEmptyState").style.display = shown ? "none" : "block";
+        $("cpCatalogStat").textContent = shown ? (shown + " mostradas") : "";
+        $("cpLoadMoreBtn").style.display = rows.length === COMMUNITY_PAGE_SIZE ? "inline-flex" : "none";
+      });
+  }
+  $("cpLoadMoreBtn").addEventListener("click", function(){ loadCommunityPlants(true).catch(function(){}); });
+
+  function loadCommunityTraps(append){
+    if(!append) communityTrapsOffset = 0;
+    return sb.from("traps").select("*, profiles(display_name, location_text)")
+      .order("created_at", {ascending:false})
+      .range(communityTrapsOffset, communityTrapsOffset + COMMUNITY_PAGE_SIZE - 1)
+      .then(function(res){
+        if(res.error) throw res.error;
+        var rows = res.data || [];
+        communityTrapsOffset += rows.length;
+        var list = $("ctCatalogList");
+        if(!append) list.innerHTML = "";
+        rows.forEach(function(row){ list.appendChild(buildCommunityCard(row, "trap")); });
+        var shown = list.children.length;
+        $("ctEmptyState").style.display = shown ? "none" : "block";
+        $("ctCatalogStat").textContent = shown ? (shown + " mostradas") : "";
+        $("ctLoadMoreBtn").style.display = rows.length === COMMUNITY_PAGE_SIZE ? "inline-flex" : "none";
+      });
+  }
+  $("ctLoadMoreBtn").addEventListener("click", function(){ loadCommunityTraps(true).catch(function(){}); });
 
   /* =====================================================================
      INIT
      ===================================================================== */
   buildPfSizeChips();
   buildPlantSizeChips();
-  loadProfile();
-  loadPlants();
-  loadTraps();
-  renderProfileSummary();
-  renderGeoStatus();
-  updatePfSaveEnabled();
-  renderPlantsCatalog();
-  renderTrapsCatalog();
-  renderPlantResult();
-  renderTrapResult();
-  activateTab(hasProfile() ? "plantas" : "perfil");
+  // el resto del arranque (cargar perfil/plantas/trampas y mostrar la app)
+  // pasa por afterLogin(), disparado por el listener de sesión de Supabase
+  // definido más arriba, apenas detecta una sesión activa.
 })();
 </script>
 
